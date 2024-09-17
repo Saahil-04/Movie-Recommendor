@@ -47,7 +47,7 @@ mood_to_genre_map = {
 genres_map = {
     "action": "28",
     "comedy": "35",
-    "romantic": "10749",
+    "romance": "10749",
     # Add more mappings if needed
 }
 

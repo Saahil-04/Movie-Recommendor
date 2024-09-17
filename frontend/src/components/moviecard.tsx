@@ -19,13 +19,13 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie }) => (
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'space-between',
-      height: 350, // Set fixed height
+      height: 450, // Set fixed height
       width: '100%', // Full width within its container
     }}
   >
     <CardMedia component="img" height="400" image={movie.poster_url} alt={movie.title}
       sx={{
-        height: '65%', // Image takes up 65% of the card height
+        height: '80%', // Image takes up 65% of the card height
         objectFit: 'cover', // Ensure image fits properly
       }} 
       />
@@ -36,7 +36,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie }) => (
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Rating value={movie.rating / 2} readOnly />
         <Typography variant="body2" sx={{ color: 'secondary.main' }}>
-          {movie.genre}
+          {movie.genre.toUpperCase()}
         </Typography>
       </Box>
     </CardContent>

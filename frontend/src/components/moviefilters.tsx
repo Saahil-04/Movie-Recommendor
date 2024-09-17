@@ -83,7 +83,7 @@ const MovieFilters: React.FC<FilterProps> = ({ onFilter }) => {
         <Select value={genre} onChange={(e) => setGenre(e.target.value)}>
           <MenuItem value="action">Action</MenuItem>
           <MenuItem value="comedy">Comedy</MenuItem>
-          <MenuItem value="drama">Drama</MenuItem>
+          <MenuItem value="romance">Romance</MenuItem>
         </Select>
       </FormControl>
 
