@@ -103,7 +103,5 @@ const MovieFilters: React.FC<FilterProps> = ({ onFilter }) => {
 };
 
 export default MovieFilters;
-function useEffect(arg0: () => void, arg1: string[]) {
-  throw new Error('Function not implemented.');
-}
+
 
