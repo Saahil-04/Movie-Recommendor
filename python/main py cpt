@@ -55,18 +55,6 @@ def get_keyword_id(keyword):
     except requests.exceptions.RequestException:
         return None
 
-# Get the cast details for a movie
-def get_movie_cast(movie_id):
-    try:
-        response = requests.get(f"{TMDB_BASE_URL}/movie/{movie_id}/credits", params={
-            'api_key': TMDB_API_KEY
-        })
-        response.raise_for_status()
-        cast = response.json().get('cast', [])
-        return [actor['name'] for actor in cast[:5]]  # Limit to top 5 actors
-    except requests.exceptions.RequestException:
-        return []
-
 @app.post("/recommendations")
 async def get_recommendations(filters: Filters):
     genre_id = get_genre_id(filters.genre)
@@ -93,7 +81,7 @@ async def get_recommendations(filters: Filters):
             'certification_country': 'US',
             'certification': filters.ageRating,
             'primary_release_date_gte': '2015-01-01' if filters.movieAge == 'new' else '2000-01-01',
-            # 'with_keywords': ','.join([str(kw) for kw in keyword_ids])  # Join the keyword IDs
+            'with_keywords': ','.join([str(kw) for kw in keyword_ids])  # Join the keyword IDs
         })
         response.raise_for_status()
     except requests.exceptions.RequestException:
@@ -103,18 +91,15 @@ async def get_recommendations(filters: Filters):
     if not movies:
         raise HTTPException(status_code=404, detail="No movies found matching your criteria")
 
-    # Add cast details for each movie
-    movie_details = []
-    for movie in movies:
-        movie_id = movie['id']
-        cast = get_movie_cast(movie_id)
-        movie_details.append({
-            "title": movie['title'],
-            "overview": movie['overview'],
-            "poster_url": f"https://image.tmdb.org/t/p/w500{movie['poster_path']}",
-            "rating": movie['vote_average'],
-            "genre": movie['genre_ids'],
-            "cast": cast
-        })
-
-    return {"movies": movie_details}
+    return {
+        "movies": [
+            {
+                "title": movie['title'],
+                "overview": movie['overview'],
+                "poster_path": movie['poster_path'],
+                "rating": movie['vote_average'],
+                "genre_ids": movie['genre_ids']
+            }
+            for movie in movies
+        ]
+    }

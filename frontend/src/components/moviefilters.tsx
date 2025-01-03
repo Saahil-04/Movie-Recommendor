@@ -55,15 +55,15 @@ const MovieFilters: React.FC<FilterProps> = ({ onFilter }) => {
               Happy
             </Box>
           </MenuItem>
-          <MenuItem value="exciting">
+          <MenuItem value="neutral">
             <Box display="flex" alignItems="center">
               <InsertEmoticonIcon style={{ marginRight: 8 }} />
-              Excited
+              Neutral
             </Box></MenuItem>
-          <MenuItem value="romantic">
+          <MenuItem value="sad">
             <Box display="flex" alignItems="center">
               <FavoriteBorderIcon style={{ marginRight: 8 }} />
-              Romantic
+              Sad
             </Box>
           </MenuItem>
         </Select>
