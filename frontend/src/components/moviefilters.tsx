@@ -2,20 +2,62 @@ import { Box, FormControl, InputLabel, Select, MenuItem, Button } from '@mui/mat
 import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon';
 import SentimentSatisfiedAltIcon from '@mui/icons-material/SentimentSatisfiedAlt';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 
 interface FilterProps {
   onFilter: (filters: any) => void;
 }
 
+type Language = {
+  iso_639_1: string;
+  english_name: string;
+};
+
+type Genre = {
+  id: number;
+  name: string;
+};
+
 const MovieFilters: React.FC<FilterProps> = ({ onFilter }) => {
   const [mood, setMood] = useState('');
   const [ageRating, setAgeRating] = useState('');
   const [genre, setGenre] = useState('');
+  const [genres,setGenres] = useState<Genre[]>([]);
   const [movieAge, setMovieAge] = useState('');
+  const [languages, setLanguages] = useState<Language[]>([]);
+  const [selectedLanguage, setSelectedLanguage] = useState('');
+
+  useEffect(() => {
+    const fetchGenres = async () => {
+      try {
+        const response = await fetch("http://127.0.0.1:8000/genres");
+        const data: Genre[] = await response.json();
+        setGenres(data);
+      } catch (error) {
+        console.error("Error fetching genres:", error);
+      }
+    };
+
+    fetchGenres();
+  }, []);
+  
+  useEffect(() => {
+    const fetchLanguages = async () => {
+      try {
+        const response = await fetch("http://127.0.0.1:8000/languages");
+        const data = await response.json();
+        setLanguages(data);
+      } catch (error) {
+        console.error("Error fetching languages:", error);
+      }
+    };
+
+    fetchLanguages();
+  }, []);
+
 
   const handleFilter = () => {
-    onFilter({ mood, ageRating, genre, movieAge });
+    onFilter({ mood, ageRating, genre, movieAge, language:selectedLanguage });
   };
 
 
@@ -40,15 +82,15 @@ const MovieFilters: React.FC<FilterProps> = ({ onFilter }) => {
             setMood(e.target.value);
             console.log(mood)
           }}
-          // renderValue={(selected) => (
-          //   <Box display="flex" alignItems="center">
-          //     {selected === 'happy' && <InsertEmoticonIcon style={{ marginRight: 8 }} />}
-          //     {selected === 'happy' && 'Happy'}
-          //     {selected === 'exciting' && 'Exciting'}
-          //     {selected === 'romantic' && 'Romantic'}
-          //   </Box>
-          // )}
-          >
+        // renderValue={(selected) => (
+        //   <Box display="flex" alignItems="center">
+        //     {selected === 'happy' && <InsertEmoticonIcon style={{ marginRight: 8 }} />}
+        //     {selected === 'happy' && 'Happy'}
+        //     {selected === 'exciting' && 'Exciting'}
+        //     {selected === 'romantic' && 'Romantic'}
+        //   </Box>
+        // )}
+        >
           <MenuItem value="happy">
             <Box display="flex" alignItems="center">
               <SentimentSatisfiedAltIcon style={{ marginRight: 8 }} />
@@ -81,10 +123,12 @@ const MovieFilters: React.FC<FilterProps> = ({ onFilter }) => {
       <FormControl fullWidth>
         <InputLabel>Genre</InputLabel>
         <Select value={genre} onChange={(e) => setGenre(e.target.value)}>
-          <MenuItem value="action">Action</MenuItem>
-          <MenuItem value="comedy">Comedy</MenuItem>
-          <MenuItem value="romance">Romance</MenuItem>
-        </Select>
+        {genres.map((genr) => (
+        <MenuItem key={genr.id} value={genr.id}>
+          {genr.name}
+        </MenuItem>
+      ))}
+      </Select>
       </FormControl>
 
       <FormControl fullWidth>
@@ -92,6 +136,17 @@ const MovieFilters: React.FC<FilterProps> = ({ onFilter }) => {
         <Select value={movieAge} onChange={(e) => setMovieAge(e.target.value)}>
           <MenuItem value="new">New (Last 5 years)</MenuItem>
           <MenuItem value="classic">Classic (Over 5 years)</MenuItem>
+        </Select>
+      </FormControl>
+
+      <FormControl fullWidth>
+        <InputLabel>Language</InputLabel>
+        <Select value={selectedLanguage} onChange={(e) => setSelectedLanguage(e.target.value)}>
+        {languages.map((lang) => (
+        <MenuItem key={lang.iso_639_1} value={lang.iso_639_1}>
+          {lang.english_name}
+        </MenuItem>
+      ))}
         </Select>
       </FormControl>
 

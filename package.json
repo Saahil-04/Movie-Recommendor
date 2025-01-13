@@ -1,5 +1,13 @@
 {
   "dependencies": {
     "axios": "^1.7.7"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  },
+  "scripts": {
+    "start": "concurrently \"npm run start-frontend\" \"npm run start-python\"",
+    "start-frontend": "cd frontend && npm start dev",
+    "start-python": "cd python && cmd /c \"env\\Scripts\\activate && uvicorn main:app --reload\""
   }
 }

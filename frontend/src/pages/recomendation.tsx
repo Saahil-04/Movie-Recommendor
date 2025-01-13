@@ -8,7 +8,7 @@ interface Movie {
   title: string;
   poster_url: string;
   rating: number;
-  genre: string;
+  genre: string[];
   overview: string;
   cast: string[];
 }
@@ -20,6 +20,11 @@ const Recommendation = () => {
 
   const handleFilter = async (filters: any) => {
     setIsLoading(true); // Show loading effect
+    setTimeout(() => {
+      if (cardsSectionRef.current) {
+        cardsSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
     try {
       const response = await axios.post('http://localhost:8000/recommendations/', filters);
       setFilteredMovies(response.data.movies);
@@ -27,11 +32,6 @@ const Recommendation = () => {
       console.error(error);
     } finally {
       setIsLoading(false); // Hide loading effect after fetch
-      setTimeout(() => {
-        if (cardsSectionRef.current) {
-          cardsSectionRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-      }, 100);
     }
   };
 

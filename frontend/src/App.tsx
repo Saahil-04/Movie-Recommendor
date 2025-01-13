@@ -4,18 +4,31 @@ import Home from './pages/home';
 import Recommendation from './pages/recomendation';
 import { CssBaseline, ThemeProvider } from '@mui/material';
 import { darkTheme } from './theme';
+import Genres from './pages/genres';
+import MoviesByGenre from './pages/moviesbygenre';
 
-const App = () => (
-  <ThemeProvider theme = {darkTheme}>
-    <CssBaseline/>
-  <Router>
-    <Navbar />
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/recommendation" element={<Recommendation />} />
-    </Routes>
-  </Router>
-  </ThemeProvider>
-);
+const App = () => {
+  return (
+    <ThemeProvider theme={darkTheme}>
+      <CssBaseline />
+      <Router>
+        {/* Navbar is placed outside Routes since it's common across all pages */}
+        <Navbar />
+       <main 
+       style={{ marginTop: '0px' /* Adjust for fixed Navbar height */ }}
+       >
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/recommendation" element={<Recommendation />} />
+            <Route path="/genres" element={<Genres />} />
+            <Route path="/genres/:genreId" element={<MoviesByGenre />} />
+            {/* Fallback 404 route */}
+            <Route path="*" element={<div>Page Not Found</div>} />
+          </Routes>
+        </main>
+      </Router>
+    </ThemeProvider>
+  );
+};
 
 export default App;
