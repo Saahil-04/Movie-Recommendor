@@ -1,12 +1,13 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
-import { Container, Grid, Card, CardMedia, CardContent, Typography, Skeleton, Box, Rating } from '@mui/material';
+import { Container, Grid, Card, CardMedia, CardContent, Typography, Skeleton, Box, Rating, CircularProgress, Button } from '@mui/material';
+import axios from 'axios';
 
 interface Movie {
   id: number;
   title: string;
   poster_path: string;
-  rating:number;
+  rating: number;
 
 }
 
@@ -20,31 +21,71 @@ const MoviesByGenre = () => {
   const [movies, setMovies] = useState<Movie[]>([]);
   const genreName = state?.genreName || 'Movies';
   const [isLoading, setIsLoading] = useState(false);
+  const [isPageLoading, setIsPageLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1); // Tracks the current page
+  const [hasNextPage, setHasNextPage] = useState(true); // Indicates if more pages are available
+  // const observerRef = useRef<HTMLDivElement | null>(null); // Ref for the observer
+
+  const fetchMovies = async (page: number, isInitialLoad = false) => {
+    try {
+      if (isInitialLoad) {
+        setIsLoading(true); // Show main loading spinner for the initial load
+      } else {
+        setIsPageLoading(true); // Show loading spinner for "Load More" button
+      }
+
+      const response = await axios.get(`http://localhost:8000/api/movies/genre/${genreId}`, {
+        params: { page },
+      });
+
+      const { movies: newMovies, hasNextPage: nextPage } = response.data;
+
+      setMovies((prevMovies) => {
+        const movieIds = new Set(prevMovies.map((movie) => movie.id));
+        const filteredMovies = newMovies.filter((movie: { id: number }) => !movieIds.has(movie.id));
+        return [...prevMovies, ...filteredMovies];
+      });
+
+      setHasNextPage(nextPage); // Update if more pages are available
+      setCurrentPage(page); // Update the current page
+    } catch (error) {
+      console.error('Error fetching movies:', error);
+    } finally {
+      if (isInitialLoad) {
+        setIsLoading(false); // Hide main loading spinner
+      } else {
+        setIsPageLoading(false); // Hide "Load More" button spinner
+      }
+    }
+  };
 
   useEffect(() => {
     // Fetch movies of the selected genre
-    const fetchMovies = async () => {
-      try {
-        setIsLoading(true);
-        const response = await fetch(`http://127.0.0.1:8000/api/movies/genre/${genreId}`);
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        const data = await response.json();
-        setMovies(data.movies); // Assuming backend returns { movies: [...] }
-      } catch (error) {
-        console.error('Error fetching movies:', error);
-      } finally {
-        setIsLoading(false); // Hide loading effect after fetch
-      }
-    };
-
-    fetchMovies();
+    fetchMovies(1, true);
   }, [genreId]);
+
+  // useEffect(() => {
+  //   if (!observerRef.current || !hasNextPage || isPageLoading) return;
+
+  //   const observer = new IntersectionObserver(
+  //     ([entry]) => {
+  //       if (entry.isIntersecting) {
+  //         fetchMovies(currentPage + 1); // Fetch the next page
+  //       }
+  //     },
+  //     { threshold: 1.0 }
+  //   );
+
+  //   observer.observe(observerRef.current);
+
+  //   return () => {
+  //     if (observerRef.current) observer.unobserve(observerRef.current);
+  //   };
+  // }, [currentPage, hasNextPage, isPageLoading]);
 
   return (
     <Container sx={{ marginTop: 4 }}>
-      <Typography variant="h3" textAlign="center" gutterBottom sx={{fontWeight: 'bold'}}>
+      <Typography variant="h3" textAlign="center" gutterBottom sx={{ fontWeight: 'bold' }}>
         {genreName}
       </Typography>
       <Grid container spacing={2}>
@@ -83,7 +124,7 @@ const MoviesByGenre = () => {
                         display: "flex",
                         alignItems: "center", // Center text vertically
                         justifyContent: "center", // Center text horizontally
-                        flexDirection:'column',
+                        flexDirection: 'column',
 
                       }}
                     >
@@ -111,6 +152,8 @@ const MoviesByGenre = () => {
                         {/* <Typography variant="body2" sx={{ color: 'secondary.main' }}>
                           {movie.genre[0]}
                         </Typography> */}
+
+
                       </Box>
                     </CardContent>
                   </Card>
@@ -118,7 +161,31 @@ const MoviesByGenre = () => {
               ))}
             </Grid>
           )}
+        {isPageLoading && (
+          <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', mt: 2 }}>
+            <CircularProgress />
+          </Box>
+        )}
 
+        {/* {hasNextPage && !isPageLoading && (
+                          <Box ref={observerRef} sx={{ height: '50px', mt: 2 }} />
+                        )} */}
+        {hasNextPage && !isPageLoading && (
+          <Box sx={{ textAlign: 'center', width: '100%', margin: '15px auto'  }}>
+            <Button
+              variant="contained"
+              onClick={() => fetchMovies(currentPage + 1)}
+              disabled={isPageLoading}
+            >
+              Load More
+            </Button>
+          </Box>
+        )}
+        {!hasNextPage && (
+          <Typography variant="body2" sx={{ textAlign: 'center', mt: 2 }}>
+            No more movies to load.
+          </Typography>
+        )}
       </Grid>
     </Container>
   );

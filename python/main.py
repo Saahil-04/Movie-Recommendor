@@ -113,10 +113,12 @@ async def get_movies_by_genre(genre_id: int, page: int = 1):
     try:
         response = requests.get(url, params=params)
         response.raise_for_status()
-        movies = response.json().get('results', [])
+        data = response.json()
+        movies = data.get('results', [])
         if not movies:
             raise HTTPException(status_code=404, detail="No movies found matching your criteria")
-
+        total_pages = data.get('total_pages', 1)  # Get the total number of pages
+        has_next_page = page < total_pages  # Determine if there are more pages
         # Process movie details
         movie_details = []
         for movie in movies:
@@ -131,6 +133,13 @@ async def get_movies_by_genre(genre_id: int, page: int = 1):
                 # "genre": replace_genre_ids_with_names(movie['genre_ids']),
                 # "cast": cast
             })
+            
+         # Return movies and pagination info
+        return JSONResponse(content={
+            "movies": movie_details,
+            "hasNextPage": has_next_page,
+            "currentPage": page,
+        })
 
         return JSONResponse(content={"movies": movie_details})
     except requests.exceptions.RequestException as e:
