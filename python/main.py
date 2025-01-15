@@ -127,7 +127,7 @@ async def get_movies_by_genre(genre_id: int, page: int = 1):
                 "title": movie['title'],
                 # "overview": movie['overview'],
                 "poster_path": f"https://image.tmdb.org/t/p/w500{movie['poster_path']}" if movie.get('poster_path') else None,
-                # "rating": movie['vote_average'],
+                "rating": movie['vote_average'],
                 # "genre": replace_genre_ids_with_names(movie['genre_ids']),
                 # "cast": cast
             })

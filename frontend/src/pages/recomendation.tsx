@@ -44,8 +44,10 @@ const Recommendation = () => {
   return (
     <Container>
       <MovieFilters onFilter={handleFilter} />
-      <div ref={cardsSectionRef}>
-        <Grid container spacing={2}>
+      <div ref={cardsSectionRef} style={{marginBottom:'50px'}}>
+        <Grid container spacing={2} 
+        
+         >
         {isLoading
             ? Array.from({ length: 8 }).map((_, index) => (
                 <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
