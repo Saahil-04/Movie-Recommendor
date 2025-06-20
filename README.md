@@ -54,9 +54,6 @@ npm run dev
 Made with ❤️ by Your Name
 Have questions or suggestions? Reach out via GitHub or email.
 
-yaml
-Copy
-Edit
 
 
 ---
