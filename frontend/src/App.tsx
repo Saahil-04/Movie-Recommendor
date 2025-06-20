@@ -6,6 +6,7 @@ import { CssBaseline, ThemeProvider } from '@mui/material';
 import { darkTheme } from './theme';
 import Genres from './pages/genres';
 import MoviesByGenre from './pages/moviesbygenre';
+import MovieDetails from './pages/moviedetails';
 
 const App = () => {
   return (
@@ -22,6 +23,7 @@ const App = () => {
             <Route path="/recommendation" element={<Recommendation />} />
             <Route path="/genres" element={<Genres />} />
             <Route path="/genres/:genreId" element={<MoviesByGenre />} />
+            <Route path="/movie/:id" element={<MovieDetails />} />
             {/* Fallback 404 route */}
             <Route path="*" element={<div>Page Not Found</div>} />
           </Routes>

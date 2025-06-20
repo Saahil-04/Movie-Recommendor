@@ -37,7 +37,7 @@ const MoviesByGenre = () => {
       const response = await axios.get(`http://localhost:8000/api/movies/genre/${genreId}`, {
         params: { page },
       });
-
+      console.log(response.data);
       const { movies: newMovies, hasNextPage: nextPage } = response.data;
 
       setMovies((prevMovies) => {
@@ -161,11 +161,13 @@ const MoviesByGenre = () => {
               ))}
             </Grid>
           )}
-        {isPageLoading && (
-          <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', mt: 2 }}>
-            <CircularProgress />
-          </Box>
-        )}
+        {isPageLoading && Array.from({ length: 8 }).map((_, index) => (
+            <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
+              <Skeleton variant="rectangular" height={400} animation="wave" />
+              <Skeleton variant="text" animation="wave" />
+              <Skeleton variant="text" animation="wave" />
+            </Grid>
+          ))}
 
         {/* {hasNextPage && !isPageLoading && (
                           <Box ref={observerRef} sx={{ height: '50px', mt: 2 }} />

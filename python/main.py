@@ -4,6 +4,8 @@ from pydantic import BaseModel
 import requests
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
+import httpx
+import os
 
 app = FastAPI()
 
@@ -50,6 +52,11 @@ class Filters(BaseModel):
     movieAge: str
     ageRating: str
     language:str
+    
+class RequestBody(BaseModel):
+    filters: Filters
+    page: int = 1
+    page_size: int = 20
 
 # Get genre ID for a genre string
 def get_genre_id(genre_name):
@@ -88,6 +95,76 @@ def get_movie_cast(movie_id):
         return [actor['name'] for actor in cast[:5]]  # Limit to top 5 actors
     except requests.exceptions.RequestException:
         return []
+
+
+
+movies = [
+    {
+        "id": 1,
+        "title": "Inception",
+        "posterUrl": "https://example.com/inception-poster.jpg",
+        "trailerUrl": "https://www.youtube.com/embed/YoHD9XEInc0",
+        "description": "A thief who steals corporate secrets...",
+        "genre": ["Sci-Fi", "Action"],
+        "duration": 148,
+        "releaseDate": "2010-07-16",
+        "imdbRating": 8.8,
+        "cast": [
+            {"name": "Leonardo DiCaprio", "profilePic": "https://example.com/leo.jpg"},
+            {"name": "Joseph Gordon-Levitt", "profilePic": "https://example.com/joseph.jpg"},
+        ],
+    },
+    # Add more movies
+]
+
+# Fetch movie details by ID
+@app.get("/movies/{movie_id}")
+async def get_movie_details(movie_id: int):
+    try:
+        async with httpx.AsyncClient() as client:
+            # Fetch movie details
+            movie_url = f"{TMDB_BASE_URL}/movie/{movie_id}"
+            movie_response = await client.get(
+                movie_url, params={"api_key": TMDB_API_KEY, "append_to_response": "videos,credits"}
+            )
+            if movie_response.status_code != 200:
+                raise HTTPException(status_code=movie_response.status_code, detail="Movie not found")
+            
+            movie_data = movie_response.json()
+
+            # Extract main details
+            movie_details = {
+                "id": movie_data.get("id"),
+                "title": movie_data.get("title"),
+                "description": movie_data.get("overview"),
+                "posterUrl": f"https://image.tmdb.org/t/p/w500{movie_data.get('poster_path')}",
+                "trailerUrl": None,
+                "genre": [genre["name"] for genre in movie_data.get("genres", [])],
+                "releaseDate": movie_data.get("release_date"),
+                "duration": movie_data.get("runtime"),
+                "imdbRating": movie_data.get("vote_average"),
+                "cast": [],
+            }
+
+            # Get trailer
+            videos = movie_data.get("videos", {}).get("results", [])
+            trailer = next((video for video in videos if video["type"] == "Trailer" and video["site"] == "YouTube"), None)
+            if trailer:
+                movie_details["trailerUrl"] = f"https://www.youtube.com/embed/{trailer['key']}"
+
+            # Get cast
+            credits = movie_data.get("credits", {}).get("cast", [])
+            for actor in credits[:10]:  # Limit to 10 cast members
+                movie_details["cast"].append({
+                    "name": actor.get("name"),
+                    "profilePic": f"https://image.tmdb.org/t/p/w500{actor.get('profile_path')}" if actor.get("profile_path") else None
+                })
+
+            return movie_details
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
     
 @app.get("/api/movies/genre/{genre_id}")
 async def get_movies_by_genre(genre_id: int, page: int = 1):
@@ -165,8 +242,12 @@ async def get_languages():
     except requests.exceptions.RequestException:
         raise HTTPException(status_code=500, detail="Error fetching languages from TMDB")
 @app.post("/recommendations")
-async def get_recommendations(filters: Filters):
+async def get_recommendations(request_body:RequestBody):
+    filters = request_body.filters
+    page = request_body.page
+    page_size = request_body.page_size    
     fetch_genre_mapping()  # Ensure the genre mapping is available
+    print(f"Received page: {page}")  # Add this to check the value
 
     # genre_id = get_genre_id(filters.genre)
     if not filters.genre:
@@ -192,7 +273,8 @@ async def get_recommendations(filters: Filters):
             'certification_country': 'US',
             'certification': filters.ageRating,
             'primary_release_date_gte': datetime.now().strftime('%Y-%m-%d') if filters.movieAge == 'new' else '2000-01-01',
-            'with_original_language':filters.language
+            'with_original_language':filters.language,
+            'page': page,  # Pagination: TMDB supports page-based results
             # 'with_keywords': ','.join([str(kw) for kw in keyword_ids])  # Join the keyword IDs
         })
         response.raise_for_status()
@@ -200,6 +282,8 @@ async def get_recommendations(filters: Filters):
         raise HTTPException(status_code=500, detail="Error fetching movies from TMDB")
 
     movies = response.json().get('results', [])
+    total_pages = response.json().get('total_pages', 1)
+    total_results = response.json().get('total_results', 0)
     if not movies:
         raise HTTPException(status_code=404, detail="No movies found matching your criteria")
 
@@ -217,4 +301,11 @@ async def get_recommendations(filters: Filters):
             "cast": cast
         })
 
-    return {"movies": movie_details}
+    return {"movies": movie_details,
+            "pagination": {
+            "current_page": page,
+            "page_size": page_size,
+            "total_pages": total_pages,
+            "total_results": total_results
+        }
+            }

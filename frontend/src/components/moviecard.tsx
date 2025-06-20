@@ -141,8 +141,8 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
             borderRadius: 2,
             boxShadow: 6,
             zIndex: 10,
-            width: 300,
-            maxHeight: 300,
+            width: 500,
+            maxHeight: 400,
             overflowY: 'auto',
             '&::-webkit-scrollbar': {
               width: '5px',
