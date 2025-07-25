@@ -1,195 +1,168 @@
-import { useEffect, useRef, useState } from 'react';
-import { useParams, useLocation } from 'react-router-dom';
-import { Container, Grid, Card, CardMedia, CardContent, Typography, Skeleton, Box, Rating, CircularProgress, Button } from '@mui/material';
-import axios from 'axios';
+import { useEffect, useState } from "react";
+import { useParams, useLocation } from "react-router-dom";
+import axios from "axios";
+import { motion, Variants } from "framer-motion";
+import { Skeleton } from "../components/ui/skeleton";
 
 interface Movie {
   id: number;
   title: string;
   poster_path: string;
   rating: number;
-
 }
 
 interface LocationState {
   genreName?: string;
 }
 
+const fadeInVariants:Variants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.08, duration: 0.05, ease: "easeOut" },
+  }),
+};
+
 const MoviesByGenre = () => {
   const { genreId } = useParams();
   const { state } = useLocation() as { state: LocationState };
   const [movies, setMovies] = useState<Movie[]>([]);
-  const genreName = state?.genreName || 'Movies';
   const [isLoading, setIsLoading] = useState(false);
   const [isPageLoading, setIsPageLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1); // Tracks the current page
-  const [hasNextPage, setHasNextPage] = useState(true); // Indicates if more pages are available
-  // const observerRef = useRef<HTMLDivElement | null>(null); // Ref for the observer
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasNextPage, setHasNextPage] = useState(true);
+  const genreName = state?.genreName || "Movies";
 
   const fetchMovies = async (page: number, isInitialLoad = false) => {
     try {
-      if (isInitialLoad) {
-        setIsLoading(true); // Show main loading spinner for the initial load
-      } else {
-        setIsPageLoading(true); // Show loading spinner for "Load More" button
-      }
+      if (isInitialLoad) setIsLoading(true);
+      else setIsPageLoading(true);
 
-      const response = await axios.get(`http://localhost:8000/api/movies/genre/${genreId}`, {
-        params: { page },
-      });
-      console.log(response.data);
+      const response = await axios.get(
+        `http://localhost:8000/api/movies/genre/${genreId}`,
+        { params: { page } }
+      );
+
       const { movies: newMovies, hasNextPage: nextPage } = response.data;
 
       setMovies((prevMovies) => {
         const movieIds = new Set(prevMovies.map((movie) => movie.id));
-        const filteredMovies = newMovies.filter((movie: { id: number }) => !movieIds.has(movie.id));
+        const filteredMovies = newMovies.filter(
+          (movie: { id: number }) => !movieIds.has(movie.id)
+        );
         return [...prevMovies, ...filteredMovies];
       });
 
-      setHasNextPage(nextPage); // Update if more pages are available
-      setCurrentPage(page); // Update the current page
+      setHasNextPage(nextPage);
+      setCurrentPage(page);
     } catch (error) {
-      console.error('Error fetching movies:', error);
+      console.error("Error fetching movies:", error);
     } finally {
-      if (isInitialLoad) {
-        setIsLoading(false); // Hide main loading spinner
-      } else {
-        setIsPageLoading(false); // Hide "Load More" button spinner
-      }
+      if (isInitialLoad) setIsLoading(false);
+      else setIsPageLoading(false);
     }
   };
 
   useEffect(() => {
-    // Fetch movies of the selected genre
     fetchMovies(1, true);
   }, [genreId]);
 
-  // useEffect(() => {
-  //   if (!observerRef.current || !hasNextPage || isPageLoading) return;
-
-  //   const observer = new IntersectionObserver(
-  //     ([entry]) => {
-  //       if (entry.isIntersecting) {
-  //         fetchMovies(currentPage + 1); // Fetch the next page
-  //       }
-  //     },
-  //     { threshold: 1.0 }
-  //   );
-
-  //   observer.observe(observerRef.current);
-
-  //   return () => {
-  //     if (observerRef.current) observer.unobserve(observerRef.current);
-  //   };
-  // }, [currentPage, hasNextPage, isPageLoading]);
-
   return (
-    <Container sx={{ marginTop: 4 }}>
-      <Typography variant="h3" textAlign="center" gutterBottom sx={{ fontWeight: 'bold' }}>
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <h1 className="text-4xl font-extrabold text-center text-gray-100 mb-6 tracking-wide">
         {genreName}
-      </Typography>
-      <Grid container spacing={2}>
+      </h1>
 
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
         {isLoading
           ? Array.from({ length: 8 }).map((_, index) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
-              <Skeleton variant="rectangular" height={400} animation="wave" />
-              <Skeleton variant="text" animation="wave" />
-              <Skeleton variant="text" animation="wave" />
-            </Grid>
-          )) :
-          (
-            <Grid container spacing={3} sx={{ margin: '10px' }}>
-              {movies.map((movie) => (
-                <Grid item xs={12} sm={4} md={3} key={movie.id}>
-                  <Card
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column", // Ensures content stacks vertically
-                      height: "100%", // Forces cards to stretch within the grid
-                    }}
-                  >
-                    <CardMedia
-                      component="img"
-                      image={`https://image.tmdb.org/t/p/w500${movie.poster_path}`} // Adjust image URL as per TMDB docs
-                      alt={movie.title}
-                      sx={{
-                        height: '4  00px',
-                        objectFit: 'cover',
-                      }}
-                    />
-                    <CardContent
-                      sx={{
-                        flexGrow: 1, // Ensures content fills the remaining space
-                        display: "flex",
-                        alignItems: "center", // Center text vertically
-                        justifyContent: "center", // Center text horizontally
-                        flexDirection: 'column',
+              <div
+                key={index}
+                className="animate-pulse bg-gray-800 h-80 rounded-lg"
+              />
+            ))
+          : movies.map((movie, i) => (
+              <motion.div
+                key={movie.id}
+                className="bg-gray-900 rounded-lg shadow-md overflow-hidden flex flex-col cursor-pointer
+                           hover:shadow-2xl transition-all duration-100"
+                variants={fadeInVariants}
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                custom={i}
+                whileHover={{
+                  scale: 1.05,
+                  y: -5,
+                  transition: { type: "spring", stiffness: 200 },
+                }}
+              >
+                <img
+                  src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+                  alt={movie.title}
+                  className="h-80 w-full object-cover"
+                />
+                <div className="p-4 flex flex-col flex-grow justify-between text-center">
+                  <h2 className="text-lg font-semibold text-indigo-400 mb-2">
+                    {movie.title}
+                  </h2>
+                  <div className="flex justify-center items-center gap-2">
+                    <div className="flex">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <svg
+                          key={i}
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill={
+                            i < Math.round(movie.rating / 2)
+                              ? "#fbbf24"
+                              : "#4b5563"
+                          }
+                          className="w-5 h-5"
+                        >
+                          <path d="M12 .587l3.668 7.431 8.2 1.191-5.934 5.782 1.402 8.174L12 18.896l-7.336 3.869 1.402-8.174L.132 9.209l8.2-1.191z" />
+                        </svg>
+                      ))}
+                    </div>
+                    <span className="text-yellow-400 font-bold">
+                      {(movie.rating / 2).toFixed(1)}
+                    </span>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+      </div>
 
-                      }}
-                    >
-                      <Typography
-                        variant="h6"
-                        component="h2"
-                        // noWrap
-                        sx={{ fontWeight: 'bold', color: 'primary.main', marginBottom: 1 }}
-                      >
-                        {movie.title}
-                      </Typography>
-                      <Box display="flex" justifyContent="space-between" alignItems="center">
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <Rating value={movie.rating / 2} readOnly precision={0.1} />
-                          <Typography
-                            variant="body2"
-                            sx={{
-                              color: '#d9b61c',
-                              fontWeight: 'bold',
-                            }}
-                          >
-                            {(movie.rating / 2).toFixed(1)}
-                          </Typography>
-                        </Box>
-                        {/* <Typography variant="body2" sx={{ color: 'secondary.main' }}>
-                          {movie.genre[0]}
-                        </Typography> */}
-
-
-                      </Box>
-                    </CardContent>
-                  </Card>
-                </Grid>
-              ))}
-            </Grid>
-          )}
-        {isPageLoading && Array.from({ length: 8 }).map((_, index) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
-              <Skeleton variant="rectangular" height={400} animation="wave" />
-              <Skeleton variant="text" animation="wave" />
-              <Skeleton variant="text" animation="wave" />
-            </Grid>
+       {isPageLoading && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 mt-6">
+          {Array.from({ length: 8 }).map((_, index) => (
+            <div key={index} className="flex flex-col space-y-3">
+              <Skeleton className="h-80 w-full rounded-lg bg-gray-800" />
+              <Skeleton className="h-5 w-3/4 rounded bg-gray-700 mx-auto" />
+              <Skeleton className="h-4 w-1/2 rounded bg-gray-700 mx-auto" />
+            </div>
           ))}
+        </div>
+      )}
 
-        {/* {hasNextPage && !isPageLoading && (
-                          <Box ref={observerRef} sx={{ height: '50px', mt: 2 }} />
-                        )} */}
-        {hasNextPage && !isPageLoading && (
-          <Box sx={{ textAlign: 'center', width: '100%', margin: '15px auto'  }}>
-            <Button
-              variant="contained"
-              onClick={() => fetchMovies(currentPage + 1)}
-              disabled={isPageLoading}
-            >
-              Load More
-            </Button>
-          </Box>
-        )}
-        {!hasNextPage && (
-          <Typography variant="body2" sx={{ textAlign: 'center', mt: 2 }}>
-            No more movies to load.
-          </Typography>
-        )}
-      </Grid>
-    </Container>
+      {hasNextPage && !isPageLoading && (
+        <div className="text-center mt-6">
+          <button
+            onClick={() => fetchMovies(currentPage + 1)}
+            className="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-500 transition-colors duration-300"
+          >
+            Load More
+          </button>
+        </div>
+      )}
+
+      {!hasNextPage && (
+        <p className="text-center text-gray-400 mt-4">
+          No more movies to load.
+        </p>
+      )}
+    </div>
   );
 };
 

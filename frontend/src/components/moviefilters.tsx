@@ -1,8 +1,26 @@
-import { Box, FormControl, InputLabel, Select, MenuItem, Button } from '@mui/material';
-import InsertEmoticonIcon from '@mui/icons-material/InsertEmoticon';
-import SentimentSatisfiedAltIcon from '@mui/icons-material/SentimentSatisfiedAlt';
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
-import { useState,useEffect } from 'react';
+import { useState, useEffect } from "react";
+import { Button } from "../components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "../components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "../components/ui/command";
+import { Label } from "../components/ui/label";
+import { Card } from "../components/ui/card";
+import {
+  Smile,
+  Frown,
+  ChevronsUpDown, Check
+} from "lucide-react";
+import { cn } from "../libs/utils";
 
 interface FilterProps {
   onFilter: (filters: any) => void;
@@ -19,144 +37,194 @@ type Genre = {
 };
 
 const MovieFilters: React.FC<FilterProps> = ({ onFilter }) => {
-  const [mood, setMood] = useState('');
-  const [ageRating, setAgeRating] = useState('');
-  const [genre, setGenre] = useState('');
-  const [genres,setGenres] = useState<Genre[]>([]);
-  const [movieAge, setMovieAge] = useState('');
+  const [mood, setMood] = useState("");
+  const [ageRating, setAgeRating] = useState("");
+  const [genre, setGenre] = useState("");
+  const [movieAge, setMovieAge] = useState("");
+  const [selectedLanguage, setSelectedLanguage] = useState("");
+
+  const [genres, setGenres] = useState<Genre[]>([]);
   const [languages, setLanguages] = useState<Language[]>([]);
-  const [selectedLanguage, setSelectedLanguage] = useState('');
+
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchGenres = async () => {
-      try {
-        const response = await fetch("http://127.0.0.1:8000/genres");
-        const data: Genre[] = await response.json();
-        setGenres(data);
-      } catch (error) {
-        console.error("Error fetching genres:", error);
-      }
+      const res = await fetch("http://127.0.0.1:8000/genres");
+      const data = await res.json();
+      setGenres(data);
     };
-
     fetchGenres();
   }, []);
-  
+
   useEffect(() => {
     const fetchLanguages = async () => {
-      try {
-        const response = await fetch("http://127.0.0.1:8000/languages");
-        const data = await response.json();
-        setLanguages(data);
-      } catch (error) {
-        console.error("Error fetching languages:", error);
-      }
+      const res = await fetch("http://127.0.0.1:8000/languages");
+      const data = await res.json();
+      setLanguages(data);
     };
-
     fetchLanguages();
   }, []);
 
-
   const handleFilter = () => {
-    onFilter({ mood, ageRating, genre, movieAge, language:selectedLanguage });
+    onFilter({ mood, ageRating, genre, movieAge, language: selectedLanguage });
   };
 
-
+  const Combobox = ({
+    label,
+    value,
+    setValue,
+    options,
+    placeholder,
+    fieldKey,
+  }: {
+    label: string;
+    value: string;
+    setValue: (val: string) => void;
+    options: { value: string; label: string; icon?: React.ReactNode }[];
+    placeholder: string;
+    fieldKey: string;
+  }) => (
+    <div className="space-y-2">
+      <Label className="text-gray-300">{label}</Label>
+      <Popover
+        open={openDropdown === fieldKey}
+        onOpenChange={(open) => setOpenDropdown(open ? fieldKey : null)}
+      >
+        <PopoverTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            aria-expanded={openDropdown === fieldKey}
+            className="w-full justify-between bg-gray-800 text-gray-200 border-gray-700 hover:bg-gray-700"
+          >
+            {value
+              ? options.find((opt) => opt.value === value)?.label
+              : placeholder}
+            <ChevronsUpDown className="opacity-50 h-4 w-4" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0 bg-gray-900 border border-gray-700">
+          <Command className="border-0 bg-transparent shadow-none">
+            <CommandInput
+              placeholder={`Search ${label.toLowerCase()}...`}
+              className="h-9 border-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:border-0"
+            />
+            <CommandList>
+              <CommandEmpty>No {label.toLowerCase()} found.</CommandEmpty>
+              <CommandGroup>
+                {options.map((opt) => (
+                  <CommandItem
+                    key={opt.value}
+                    value={opt.value}
+                    onSelect={(currentValue) => {
+                      setValue(currentValue === value ? "" : currentValue);
+                      setOpenDropdown(null);
+                    }}
+                    className={cn(
+                      "cursor-pointer", // ✅ your extra styles
+                      "aria-selected:bg-accent aria-selected:text-accent-foreground" // ✅ must keep
+                    )}
+                  >
+                    {opt.icon}
+                    {opt.label}
+                    <Check
+                      className={cn(
+                        "ml-auto h-4 w-4",
+                        value === opt.value
+                          ? "opacity-100 text-indigo-500"
+                          : "opacity-0"
+                      )}
+                    />
+                  </CommandItem>
+                ))}
+              </CommandGroup>
+            </CommandList>
+          </Command>
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 2,
-        backgroundColor: 'background.paper',
-        padding: 3,
-        borderRadius: 3,
-        boxShadow: 3,
-        marginTop: 3,
-        marginBottom: 4,
-      }}
-    >
-      <FormControl fullWidth>
-        <InputLabel>Mood</InputLabel>
-        <Select value={mood}
-          onChange={(e) => {
-            setMood(e.target.value);
-            console.log(mood)
-          }}
-        // renderValue={(selected) => (
-        //   <Box display="flex" alignItems="center">
-        //     {selected === 'happy' && <InsertEmoticonIcon style={{ marginRight: 8 }} />}
-        //     {selected === 'happy' && 'Happy'}
-        //     {selected === 'exciting' && 'Exciting'}
-        //     {selected === 'romantic' && 'Romantic'}
-        //   </Box>
-        // )}
-        >
-          <MenuItem value="happy">
-            <Box display="flex" alignItems="center">
-              <SentimentSatisfiedAltIcon style={{ marginRight: 8 }} />
-              Happy
-            </Box>
-          </MenuItem>
-          <MenuItem value="neutral">
-            <Box display="flex" alignItems="center">
-              <InsertEmoticonIcon style={{ marginRight: 8 }} />
-              Neutral
-            </Box></MenuItem>
-          <MenuItem value="sad">
-            <Box display="flex" alignItems="center">
-              <FavoriteBorderIcon style={{ marginRight: 8 }} />
-              Sad
-            </Box>
-          </MenuItem>
-        </Select>
-      </FormControl>
+    <Card className="p-6 bg-gray-900 border border-gray-800 rounded-xl shadow-md space-y-4 mt-6 mb-8 w-full">
+      <Combobox
+        label="Mood"
+        value={mood}
+        setValue={setMood}
+        placeholder="Select mood"
+        fieldKey="mood"
+        options={[
+          {
+            value: "happy",
+            label: "Happy",
+            icon: <Smile className="w-4 h-4 text-yellow-400" />,
+          },
+          {
+            value: "neutral",
+            label: "Neutral",
+            icon: <Smile className="w-4 h-4 text-gray-400" />,
+          },
+          {
+            value: "sad",
+            label: "Sad",
+            icon: <Frown className="w-4 h-4 text-blue-400" />,
+          },
+        ]}
+      />
 
-      <FormControl fullWidth>
-        <InputLabel>Age Rating</InputLabel>
-        <Select value={ageRating} onChange={(e) => setAgeRating(e.target.value)}>
-          <MenuItem value="PG">PG</MenuItem>
-          <MenuItem value="PG-13">PG-13</MenuItem>
-          <MenuItem value="R">R</MenuItem>
-        </Select>
-      </FormControl>
+      <Combobox
+        label="Age Rating"
+        value={ageRating}
+        setValue={setAgeRating}
+        placeholder="Select age rating"
+        fieldKey="ageRating"
+        options={["PG", "PG-13", "R"].map((r) => ({ value: r, label: r }))}
+      />
 
-      <FormControl fullWidth>
-        <InputLabel>Genre</InputLabel>
-        <Select value={genre} onChange={(e) => setGenre(e.target.value)}>
-        {genres.map((genr) => (
-        <MenuItem key={genr.id} value={genr.id}>
-          {genr.name}
-        </MenuItem>
-      ))}
-      </Select>
-      </FormControl>
+      <Combobox
+        label="Genre"
+        value={genre}
+        setValue={setGenre}
+        placeholder="Select genre"
+        fieldKey="genre"
+        options={genres.map((g) => ({
+          value: g.id.toString(),
+          label: g.name,
+        }))}
+      />
 
-      <FormControl fullWidth>
-        <InputLabel>Movie Age</InputLabel>
-        <Select value={movieAge} onChange={(e) => setMovieAge(e.target.value)}>
-          <MenuItem value="new">New (Last 5 years)</MenuItem>
-          <MenuItem value="classic">Classic (Over 5 years)</MenuItem>
-        </Select>
-      </FormControl>
+      <Combobox
+        label="Movie Age"
+        value={movieAge}
+        setValue={setMovieAge}
+        placeholder="Select movie age"
+        fieldKey="movieAge"
+        options={[
+          { value: "new", label: "New (Last 5 years)" },
+          { value: "classic", label: "Classic (Over 5 years)" },
+        ]}
+      />
 
-      <FormControl fullWidth>
-        <InputLabel>Language</InputLabel>
-        <Select value={selectedLanguage} onChange={(e) => setSelectedLanguage(e.target.value)}>
-        {languages.map((lang) => (
-        <MenuItem key={lang.iso_639_1} value={lang.iso_639_1}>
-          {lang.english_name}
-        </MenuItem>
-      ))}
-        </Select>
-      </FormControl>
+      <Combobox
+        label="Language"
+        value={selectedLanguage}
+        setValue={setSelectedLanguage}
+        placeholder="Select language"
+        fieldKey="language"
+        options={languages.map((lang) => ({
+          value: lang.iso_639_1,
+          label: lang.english_name,
+        }))}
+      />
 
-      <Button variant="contained" fullWidth onClick={handleFilter} sx={{ marginTop: 2 }}>
+      <Button
+        onClick={handleFilter}
+        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold mt-3"
+      >
         Filter Movies
       </Button>
-    </Box>
+    </Card>
   );
 };
 
 export default MovieFilters;
-
-

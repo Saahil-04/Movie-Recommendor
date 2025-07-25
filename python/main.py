@@ -226,6 +226,7 @@ async def get_genres():
     try:
         response = requests.get(f"{TMDB_BASE_URL}/genre/movie/list", params={"api_key": TMDB_API_KEY})
         response.raise_for_status()
+      
         return response.json().get("genres", [])
     except requests.exceptions.RequestException as e:
         raise HTTPException(status_code=500, detail="Error fetching genres from TMDB")

@@ -1,5 +1,10 @@
-import { useState, useRef } from 'react';
-import { Card, CardMedia, CardContent, Typography, Rating, Box } from '@mui/material';
+import { motion } from "framer-motion";
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "../components/ui/hover-card";
+
 
 interface MovieCardProps {
   movie: {
@@ -13,167 +18,97 @@ interface MovieCardProps {
 }
 
 const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
-  const [isHovered, setIsHovered] = useState(false);
-  const [popupPosition, setPopupPosition] = useState({ top: 0, left: 0 });
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const handleMouseEnter = (event: React.MouseEvent<HTMLDivElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const popupWidth = 300; // Adjust this to the width of your popup
-    const popupHeight = 300; // Adjust this to the height of your popup
-  
-    // Calculate the default position
-    let top = rect.top + window.scrollY + 300;
-    let left = rect.left + rect.width;
-  
-    // Adjust the `left` position if the popup goes beyond the right edge of the viewport
-    if (left + popupWidth > window.innerWidth) {
-      left = window.innerWidth - popupWidth - 10; // Add some padding to the right edge
-    }
-  
-    // Adjust the `top` position if the popup goes beyond the bottom edge of the viewport
-    if (top + popupHeight > window.innerHeight) {
-      top = rect.top + window.scrollY - popupHeight + 800 ; // Add some padding to the top edge
-    }
-  
-    // Set the new position
-    setPopupPosition({ top, left });
-    setIsHovered(true);
-  };
-
-  const handleMouseLeave = (event: React.MouseEvent<HTMLDivElement>) => {
-    const relatedTarget = event.relatedTarget;
-
-    // Safely check if relatedTarget is a valid Node and contains containerRef
-    if (
-      !(relatedTarget instanceof Node) || // Ensure relatedTarget is a valid DOM Node
-      (containerRef.current && !containerRef.current.contains(relatedTarget)) // Ensure containerRef is valid and contains relatedTarget
-    ) {
-      setIsHovered(false);
-    }
-  };
-
   return (
-    <div>
-      {/* Movie Card */}
-      <Card
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        sx={{
-          position: 'relative',
-          height: 450,
-          overflow: 'hidden',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'flex-end',
-          boxShadow: 3,
-          borderRadius: 2,
-          cursor: 'pointer',
-          '&:hover': { boxShadow: 6 },
-          backgroundColor: 'background.paper',
-        }}
-      >
-        <CardMedia
-          component="img"
-          image={movie.poster_url}
-          alt={movie.title}
-          sx={{
-            height: '100%',
-            objectFit: 'cover',
-            transition: 'transform 0.3s ease-in-out',
-            transform: isHovered ? 'scale(1.1)' : 'scale(1)',
-          }}
-        />
-
-        <CardContent>
-          <Typography
-            variant="h6"
-            component="h2"
-            noWrap
-            sx={{ fontWeight: 'bold', color: 'primary.main', marginBottom: 1 }}
-          >
-            {movie.title}
-          </Typography>
-          <Box display="flex" justifyContent="space-between" alignItems="center">
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Rating value={movie.rating / 2} readOnly precision={0.1} />
-              <Typography
-                variant="body2"
-                sx={{
-                  color: '#d9b61c',
-                  fontWeight: 'bold',
-                }}
-              >
-                {(movie.rating / 2).toFixed(1)}
-              </Typography>
-            </Box>
-            <Typography variant="body2" sx={{ color: 'secondary.main' }}>
-              {movie.genre[0]}
-            </Typography>
-          </Box>
-        </CardContent>
-      </Card>
-
-      {/* Custom Popup */}
-      {isHovered && (
-        <Box
-          ref={containerRef}
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={(event) => {
-            const relatedTarget = event.relatedTarget;
-
-            // Safely check if relatedTarget is a valid Node and containerRef contains it
-            if (
-              !(relatedTarget instanceof Node) || // Ensure relatedTarget is a valid DOM Node
-              (containerRef.current && !containerRef.current.contains(relatedTarget)) // Ensure containerRef is valid and contains relatedTarget
-            ) {
-              setIsHovered(false);
-            }
-          }}
-          sx={{
-            position: 'absolute',
-            top: popupPosition.top,
-            left: popupPosition.left,
-            transform: 'translate(-50%, -100%)',
-            backgroundColor: 'rgba(0, 0, 0, 0.9)',
-            color: '#fff',
-            padding: 2,
-            borderRadius: 2,
-            boxShadow: 6,
-            zIndex: 10,
-            width: 500,
-            maxHeight: 400,
-            overflowY: 'auto',
-            '&::-webkit-scrollbar': {
-              width: '5px',
-            },
-            '&::-webkit-scrollbar-thumb': {
-              backgroundColor: 'rgba(255, 255, 255, 0.5)',
-              borderRadius: '4px',
-            },
-          }}
+    <HoverCard openDelay={100} closeDelay={100}>
+      <HoverCardTrigger asChild>
+        <motion.div
+          className="relative rounded-lg overflow-hidden shadow-md cursor-pointer transition-all duration-200 hover:shadow-2xl"
+          whileHover={{ scale: 1.05 }}
         >
-          <Typography variant="h6" sx={{ fontWeight: 'bold', marginBottom: 1 }}>
-            {movie.title}
-          </Typography>
-          <Typography variant="body2" sx={{ marginBottom: 2 }}>
-            {movie.overview}
-          </Typography>
-          <Typography variant="body2" sx={{ fontStyle: 'italic', marginBottom: 1 }}>
-            Genre: {movie.genre.join(', ')}
-          </Typography>
-          <Typography variant="body2" sx={{ marginBottom: 1 }}>
-            Cast: {movie.cast.join(', ')}
-          </Typography>
-          <Box display="flex" alignItems="center" gap={1}>
-            <Rating value={movie.rating / 2} readOnly precision={0.1} />
-            <Typography variant="body2" sx={{ fontWeight: 'bold', color: '#d9b61c' }}>
-              {(movie.rating / 2).toFixed(1)}
-            </Typography>
-          </Box>
-        </Box>
-      )}
-    </div>
+          {/* Poster Image */}
+          <img
+            src={movie.poster_url}
+            alt={movie.title}
+            className="h-96 w-full object-cover"
+          />
+
+          {/* Gradient Overlay */}
+          <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-black via-black/60 to-transparent px-4 py-3 flex flex-col justify-end">
+            <h2 className="text-sm sm:text-base font-semibold text-indigo-300 truncate">
+              {movie.title}
+            </h2>
+            <div className="flex items-center gap-2 mt-1">
+              {/* Stars */}
+              <div className="flex">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <svg
+                    key={i}
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill={
+                      i < Math.round(movie.rating / 2)
+                        ? "#fbbf24"
+                        : "#4b5563"
+                    }
+                    className="w-4 h-4"
+                  >
+                    <path d="M12 .587l3.668 7.431 8.2 1.191-5.934 5.782 1.402 8.174L12 18.896l-7.336 3.869 1.402-8.174L.132 9.209l8.2-1.191z" />
+                  </svg>
+                ))}
+              </div>
+              <span className="text-yellow-400 font-bold text-xs">
+                {(movie.rating / 2).toFixed(1)}
+              </span>
+            </div>
+            <p className="text-gray-400 text-xs mt-1">{movie.genre[0]}</p>
+          </div>
+        </motion.div>
+      </HoverCardTrigger>
+
+
+      {/* ✅ Hover Popup Content */}
+      <HoverCardContent
+        side="right"
+        sideOffset={-10}
+        align="start"
+        className="w-80 bg-gray-900 text-white border-gray-700 shadow-lg"
+      >
+        <h3 className="text-lg font-bold text-indigo-400">{movie.title}</h3>
+        <p className="text-sm text-gray-300 mt-2 line-clamp-4">
+          {movie.overview}
+        </p>
+        <p className="text-xs text-gray-400 mt-2">
+          <span className="font-semibold text-gray-300">Genre:</span>{" "}
+          {movie.genre.join(", ")}
+        </p>
+        <p className="text-xs text-gray-400 mt-1">
+          <span className="font-semibold text-gray-300">Cast:</span>{" "}
+          {movie.cast.join(", ")}
+        </p>
+        <div className="flex items-center gap-1 mt-3">
+          <div className="flex">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <svg
+                key={i}
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill={
+                  i < Math.round(movie.rating / 2)
+                    ? "#fbbf24"
+                    : "#4b5563"
+                }
+                className="w-4 h-4"
+              >
+                <path d="M12 .587l3.668 7.431 8.2 1.191-5.934 5.782 1.402 8.174L12 18.896l-7.336 3.869 1.402-8.174L.132 9.209l8.2-1.191z" />
+              </svg>
+            ))}
+          </div>
+          <span className="text-yellow-400 font-bold text-xs">
+            {(movie.rating / 2).toFixed(1)}
+          </span>
+        </div>
+      </HoverCardContent>
+    </HoverCard>
   );
 };
 
