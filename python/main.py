@@ -204,11 +204,11 @@ async def get_movies_by_genre(genre_id: int, page: int = 1):
             movie_details.append({
                 "id": movie['id'],
                 "title": movie['title'],
-                # "overview": movie['overview'],
+                "overview": movie['overview'],
                 "poster_path": f"https://image.tmdb.org/t/p/w500{movie['poster_path']}" if movie.get('poster_path') else None,
                 "rating": movie['vote_average'],
-                # "genre": replace_genre_ids_with_names(movie['genre_ids']),
-                # "cast": cast
+                "genre": replace_genre_ids_with_names(movie['genre_ids']),
+                "cast": cast
             })
             
          # Return movies and pagination info
@@ -242,6 +242,8 @@ async def get_languages():
         return languages
     except requests.exceptions.RequestException:
         raise HTTPException(status_code=500, detail="Error fetching languages from TMDB")
+    
+    
 @app.post("/recommendations")
 async def get_recommendations(request_body:RequestBody):
     filters = request_body.filters

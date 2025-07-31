@@ -119,28 +119,26 @@ const Recommendation = () => {
       <div ref={cardsSectionRef} className="mt-8">
         {/* ✅ Loading Skeletons */}
         {isLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 mt-6">
             {Array.from({ length: 8 }).map((_, index) => (
               <div key={index} className="flex flex-col space-y-3">
-                <Skeleton className="h-80 w-full rounded-lg bg-gray-800" />
+                <Skeleton className="h-80 w-full rounded-lg bg-gradient-to-br from-gray-800 to-transparent" />
                 <Skeleton className="h-5 w-3/4 rounded bg-gray-700 mx-auto" />
                 <Skeleton className="h-4 w-1/2 rounded bg-gray-700 mx-auto" />
-              </div>  
+              </div>
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 mt-6">
             {filteredMovies.map((movie, i) => (
               <motion.div
                 key={i}
                 variants={fadeInVariants}
-                initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true }}
                 custom={i}
                 whileHover={{
                   scale: 1.05,
-                  y: -5,
                   transition: { type: "spring", stiffness: 200 },
                 }}
               >

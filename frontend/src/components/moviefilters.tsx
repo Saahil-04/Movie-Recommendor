@@ -67,7 +67,10 @@ const MovieFilters: React.FC<FilterProps> = ({ onFilter }) => {
   }, []);
 
   const handleFilter = () => {
-    onFilter({ mood, ageRating, genre, movieAge, language: selectedLanguage });
+
+    const selectedGenreId = genres.find((g) => g.name === genre)?.id ?? "";
+    const selectedLangCode = languages.find((l) => l.english_name === selectedLanguage)?.iso_639_1 ?? "";
+    onFilter({ mood, ageRating, genre:selectedGenreId, movieAge, language: selectedLangCode });
   };
 
   const Combobox = ({
@@ -122,8 +125,8 @@ const MovieFilters: React.FC<FilterProps> = ({ onFilter }) => {
                       setOpenDropdown(null);
                     }}
                     className={cn(
-                      "cursor-pointer", // ✅ your extra styles
-                      "aria-selected:bg-accent aria-selected:text-accent-foreground" // ✅ must keep
+                      "cursor-pointer",
+                      "aria-selected:bg-accent aria-selected:text-accent-foreground"
                     )}
                   >
                     {opt.icon}
@@ -188,7 +191,7 @@ const MovieFilters: React.FC<FilterProps> = ({ onFilter }) => {
         placeholder="Select genre"
         fieldKey="genre"
         options={genres.map((g) => ({
-          value: g.id.toString(),
+          value: g.name, // ✅ now searchable
           label: g.name,
         }))}
       />
@@ -212,7 +215,7 @@ const MovieFilters: React.FC<FilterProps> = ({ onFilter }) => {
         placeholder="Select language"
         fieldKey="language"
         options={languages.map((lang) => ({
-          value: lang.iso_639_1,
+          value: lang.english_name,
           label: lang.english_name,
         }))}
       />
