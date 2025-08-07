@@ -280,11 +280,13 @@ async def get_recommendations(request_body:RequestBody):
             'page': page,  # Pagination: TMDB supports page-based results
             # 'with_keywords': ','.join([str(kw) for kw in keyword_ids])  # Join the keyword IDs
         })
+       
         response.raise_for_status()
     except requests.exceptions.RequestException:
         raise HTTPException(status_code=500, detail="Error fetching movies from TMDB")
 
     movies = response.json().get('results', [])
+    
     total_pages = response.json().get('total_pages', 1)
     total_results = response.json().get('total_results', 0)
     if not movies:
@@ -296,6 +298,7 @@ async def get_recommendations(request_body:RequestBody):
         movie_id = movie['id']
         cast = get_movie_cast(movie_id)
         movie_details.append({
+            "id": movie['id'],
             "title": movie['title'],
             "overview": movie['overview'],
             "poster_url": f"https://image.tmdb.org/t/p/w500{movie['poster_path']}",

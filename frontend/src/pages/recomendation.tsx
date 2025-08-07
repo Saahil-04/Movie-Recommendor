@@ -6,6 +6,7 @@ import MovieCard from "../components/moviecard";
 import { Skeleton } from "../components/ui/skeleton";
 
 interface Movie {
+  id: number;
   title: string;
   poster_url: string;
   rating: number;
@@ -117,14 +118,14 @@ const Recommendation = () => {
       <MovieFilters onFilter={handleFilter} />
 
       <div ref={cardsSectionRef} className="mt-8">
-        {/* ✅ Loading Skeletons */}
+
         {isLoading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 mt-6">
             {Array.from({ length: 8 }).map((_, index) => (
               <div key={index} className="flex flex-col space-y-3">
                 <Skeleton className="h-80 w-full rounded-lg bg-gradient-to-br from-gray-800 to-transparent" />
-                <Skeleton className="h-5 w-3/4 rounded bg-gray-700 mx-auto" />
-                <Skeleton className="h-4 w-1/2 rounded bg-gray-700 mx-auto" />
+                <Skeleton className="h-5 w-3/4 rounded bg-gradient-to-r from-gray-700 to-transparent mx-auto" />
+                <Skeleton className="h-4 w-1/2 rounded bg-gradient-to-r from-gray-700 to-transparent mx-auto" />
               </div>
             ))}
           </div>
@@ -153,9 +154,9 @@ const Recommendation = () => {
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 mt-6">
             {Array.from({ length: 4 }).map((_, index) => (
               <div key={index} className="flex flex-col space-y-3">
-                <Skeleton className="h-80 w-full rounded-lg bg-gray-800" />
-                <Skeleton className="h-5 w-3/4 rounded bg-gray-700 mx-auto" />
-                <Skeleton className="h-4 w-1/2 rounded bg-gray-700 mx-auto" />
+                <Skeleton className="h-80 w-full rounded-lg bg-gradient-to-br from-gray-800 to-transparent" />
+                <Skeleton className="h-5 w-3/4 rounded bg-gradient-to-r from-gray-700 to-transparent mx-auto" />
+                <Skeleton className="h-4 w-1/2 rounded bg-gradient-to-r from-gray-700 to-transparent mx-auto" />
               </div>
             ))}
           </div>

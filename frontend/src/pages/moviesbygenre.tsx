@@ -98,6 +98,7 @@ const MoviesByGenre = () => {
             >
               <MovieCard
                 movie={{
+                  id:movie.id,
                   title: movie.title,
                   poster_url: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
                   rating: movie.rating,

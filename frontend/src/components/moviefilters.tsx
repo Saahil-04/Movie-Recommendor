@@ -70,7 +70,7 @@ const MovieFilters: React.FC<FilterProps> = ({ onFilter }) => {
 
     const selectedGenreId = genres.find((g) => g.name === genre)?.id ?? "";
     const selectedLangCode = languages.find((l) => l.english_name === selectedLanguage)?.iso_639_1 ?? "";
-    onFilter({ mood, ageRating, genre:selectedGenreId, movieAge, language: selectedLangCode });
+    onFilter({ mood, ageRating, genre: selectedGenreId, movieAge, language: selectedLangCode });
   };
 
   const Combobox = ({

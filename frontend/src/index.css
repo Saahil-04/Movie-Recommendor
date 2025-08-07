@@ -6,6 +6,11 @@
 
 @custom-variant dark (&:is(.dark *));
 
+html {
+  scroll-behavior: auto; /* ✅ prevent conflict with Lenis */
+  overflow-x: hidden;
+}
+
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
