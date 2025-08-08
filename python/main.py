@@ -6,6 +6,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
 import httpx
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = FastAPI()
 
@@ -17,8 +20,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-TMDB_API_KEY = 'b238a46baa3fa8bd5fbae8981280cf06'
-TMDB_BASE_URL = 'https://api.themoviedb.org/3'
+TMDB_API_KEY = os.getenv('TMDB_API_KEY')
+TMDB_BASE_URL = os.getenv('TMDB_BASE_URL')
 
 GENRE_MAPPING = {}
 
