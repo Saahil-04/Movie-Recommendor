@@ -18,7 +18,7 @@ import { Card } from "../components/ui/card";
 import {
   Smile,
   Frown,
-  ChevronsUpDown, 
+  ChevronsUpDown,
   Check,
   Sparkles,
   Filter,
@@ -57,7 +57,7 @@ const MovieFilters: React.FC<FilterProps> = ({ onFilter }) => {
 
   useEffect(() => {
     const fetchGenres = async () => {
-      const res = await fetch("http://127.0.0.1:8000/genres");
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/genres`);
       const data = await res.json();
       setGenres(data);
     };
@@ -66,7 +66,7 @@ const MovieFilters: React.FC<FilterProps> = ({ onFilter }) => {
 
   useEffect(() => {
     const fetchLanguages = async () => {
-      const res = await fetch("http://127.0.0.1:8000/languages");
+      const res = await fetch(`${process.env.REACT_APP_API_URL}/languages`);
       const data = await res.json();
       setLanguages(data);
     };
@@ -127,7 +127,7 @@ const MovieFilters: React.FC<FilterProps> = ({ onFilter }) => {
                 : placeholder}
             </span>
             <ChevronsUpDown className="opacity-50 h-4 w-4 group-hover:opacity-100 transition-opacity" />
-            
+
             {/* Hover effect */}
             <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-blue-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           </Button>
@@ -188,7 +188,7 @@ const MovieFilters: React.FC<FilterProps> = ({ onFilter }) => {
       <Card className="relative overflow-hidden bg-black/20 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl p-8 mt-6 mb-8 w-full">
         {/* Background gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-purple-900/10 via-black/20 to-blue-900/10" />
-        
+
         {/* Header */}
         <div className="relative z-10 flex items-center gap-3 mb-8">
           <div className="flex items-center gap-2">
@@ -260,13 +260,13 @@ const MovieFilters: React.FC<FilterProps> = ({ onFilter }) => {
             fieldKey="movieAge"
             icon={Calendar}
             options={[
-              { 
-                value: "new", 
+              {
+                value: "new",
                 label: "Modern (Last 5 years)",
                 icon: <Sparkles className="w-4 h-4 text-green-400" />
               },
-              { 
-                value: "classic", 
+              {
+                value: "classic",
                 label: "Classic (Over 5 years)",
                 icon: <Calendar className="w-4 h-4 text-amber-400" />
               },
@@ -305,7 +305,7 @@ const MovieFilters: React.FC<FilterProps> = ({ onFilter }) => {
               <Filter className="w-5 h-5" />
               Apply Filters & Find Movies
             </span>
-            
+
             {/* Button shine effect */}
             <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
           </Button>

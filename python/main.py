@@ -68,7 +68,6 @@ def get_genre_id(genre_name):
         'comedy': 35,
         'drama': 18,
         'romance': 10749,
-        # Add more genre mappings here
     }
     return genre_mapping.get(genre_name.lower())
 

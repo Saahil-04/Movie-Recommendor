@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import {Card, CardContent} from "../components/ui/card"
+import { Card, CardContent } from "../components/ui/card"
 import { useNavigate } from 'react-router-dom';
 import { motion } from "framer-motion"
 import { Film, Sparkles } from "lucide-react";
@@ -9,7 +9,7 @@ type Genre = {
   name: string
 }
 
-// Genre emoji mapping for visual appeal
+
 const genreEmojis: { [key: string]: string } = {
   'Action': '⚡',
   'Adventure': '🗺️',
@@ -39,7 +39,7 @@ export default function Genres() {
   useEffect(() => {
     const fetchGenres = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:8000/genres")
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/genres`)
         const data = await response.json()
         setGenres(data)
       } catch (error) {
@@ -80,7 +80,7 @@ export default function Genres() {
 
       <div className="relative z-10 max-w-7xl mx-auto py-16 px-4">
         {/* Header Section */}
-        <motion.div 
+        <motion.div
           className="text-center mb-16"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -94,14 +94,14 @@ export default function Genres() {
             <Sparkles className="w-8 h-8 text-blue-400" />
           </div>
           <p className="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
-            Discover your next favorite movie by exploring different genres. 
+            Discover your next favorite movie by exploring different genres.
             From heart-pounding action to romantic comedies.
           </p>
           <div className="w-32 h-1 bg-gradient-to-r from-purple-500 to-blue-500 mx-auto rounded-full mt-6" />
         </motion.div>
 
         {/* Grid of Genres */}
-        <motion.div 
+        <motion.div
           className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -122,21 +122,21 @@ export default function Genres() {
               >
                 {/* Hover gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 via-transparent to-blue-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                
+
                 {/* Glow effect */}
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-500/0 via-purple-500/5 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                
+
                 <CardContent className="relative z-10 flex flex-col justify-center items-center h-full p-4">
                   {/* Genre Emoji */}
                   <div className="text-2xl md:text-3xl mb-2 group-hover:scale-110 transition-transform duration-300">
                     {genreEmojis[genre.name] || '🎬'}
                   </div>
-                  
+
                   {/* Genre Name */}
                   <p className="text-sm md:text-base font-semibold text-white text-center leading-tight group-hover:text-purple-200 transition-colors duration-300">
                     {genre.name}
                   </p>
-                  
+
                   {/* Subtle shine effect on hover */}
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
                 </CardContent>
@@ -149,7 +149,7 @@ export default function Genres() {
         </motion.div>
 
         {/* Bottom CTA */}
-        <motion.div 
+        <motion.div
           className="text-center mt-16"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -157,7 +157,7 @@ export default function Genres() {
         >
           <p className="text-gray-400 text-lg">
             Can't decide? Try our{' '}
-            <span 
+            <span
               className="text-purple-400 hover:text-purple-300 cursor-pointer font-medium transition-colors"
               onClick={() => navigate('/recommendation')}
             >
