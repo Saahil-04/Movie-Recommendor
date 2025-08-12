@@ -8,7 +8,7 @@ export default function Home() {
       {/* Animated Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-purple-950 to-black">
         <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1513106580091-1d82408b8cd6?q=80&w=1476&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')] bg-cover bg-center bg-no-repeat opacity-20 mix-blend-overlay" />
-        
+
         {/* Floating orbs */}
         <motion.div
           className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl"
@@ -60,7 +60,7 @@ export default function Home() {
             transition={{ duration: 1, delay: 0.3 }}
             className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto mb-12 leading-relaxed font-light"
           >
-            Your cinematic journey begins here. Discover films that resonate with your soul, 
+            Your cinematic journey begins here. Discover films that resonate with your soul,
             curated by intelligent algorithms and passionate movie lovers.
           </motion.p>
 
@@ -113,7 +113,7 @@ export default function Home() {
             </h2>
             <div className="w-24 h-1 bg-gradient-to-r from-purple-500 to-blue-500 mx-auto rounded-full" />
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
