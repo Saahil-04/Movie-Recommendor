@@ -1,8 +1,12 @@
 import { Link } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { motion } from "framer-motion";
+import { useScrollToTop } from "../hooks/useScrollToTop";
 
 export default function Home() {
+
+  useScrollToTop()
+
   return (
     <div className="relative min-h-screen overflow-hidden">
       {/* Animated Background */}

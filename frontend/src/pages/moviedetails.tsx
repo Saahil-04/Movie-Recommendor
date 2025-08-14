@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { motion } from 'framer-motion';
 import { Play, Star, Clock, Calendar, Users, Film } from 'lucide-react';
+import { useScrollToTop } from '../hooks/useScrollToTop';
 
 const MovieDetails = () => {
   const { id } = useParams();
@@ -23,6 +24,8 @@ const MovieDetails = () => {
 
     fetchMovieDetails();
   }, [id]);
+
+  useScrollToTop()
 
   if (loading) {
     return (
@@ -235,7 +238,7 @@ const MovieDetails = () => {
                       alt={actor.name}
                       className="w-20 h-20 mx-auto rounded-full object-cover border-2 border-white/20 group-hover:border-purple-400/50 transition-colors duration-300"
                     />
-                  
+
                   </div>
                   <p className="text-white font-medium text-sm leading-tight">{actor.name}</p>
                 </div>

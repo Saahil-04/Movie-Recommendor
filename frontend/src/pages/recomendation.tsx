@@ -5,6 +5,7 @@ import MovieFilters from "../components/moviefilters";
 import MovieCard from "../components/moviecard";
 import { Skeleton } from "../components/ui/skeleton";
 import { Sparkles, Loader2, Filter } from "lucide-react";
+import { useScrollToTop } from "../hooks/useScrollToTop";
 
 interface Movie {
   id: number;
@@ -114,6 +115,8 @@ const Recommendation = () => {
       if (timeoutId) clearTimeout(timeoutId);
     };
   }, [loadingMore, currentPage, totalPages, currentFilters]);
+
+  useScrollToTop()
 
   const LoadingSkeleton = () => (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mt-8">

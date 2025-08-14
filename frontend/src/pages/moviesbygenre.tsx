@@ -5,6 +5,7 @@ import { motion, Variants } from "framer-motion";
 import { Skeleton } from "../components/ui/skeleton";
 import MovieCard from "../components/moviecard";
 import { Film, Loader2, ChevronDown } from "lucide-react";
+import { useScrollToTop } from "../hooks/useScrollToTop";
 
 interface Movie {
   id: number;
@@ -99,6 +100,8 @@ const MoviesByGenre = () => {
     fetchMovies(1, true);
   }, [genreId]);
 
+  useScrollToTop()
+
   const LoadingSkeleton = () => (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 mt-8">
       {Array.from({ length: 10 }).map((_, index) => (
@@ -144,7 +147,7 @@ const MoviesByGenre = () => {
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 py-16">
         {/* Header Section */}
-        <motion.div 
+        <motion.div
           className="text-center mb-12"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -159,12 +162,12 @@ const MoviesByGenre = () => {
             </h1>
             <Film className="w-8 h-8 text-purple-400" />
           </div>
-          
+
           <p className="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
             Discover amazing {genreName.toLowerCase()} movies handpicked just for you
           </p>
           <div className="w-32 h-1 bg-gradient-to-r from-purple-500 to-blue-500 mx-auto rounded-full mt-6" />
-          
+
           {!isLoading && movies.length > 0 && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -183,7 +186,7 @@ const MoviesByGenre = () => {
         {isLoading ? (
           <LoadingSkeleton />
         ) : (
-          <motion.div 
+          <motion.div
             className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -235,7 +238,7 @@ const MoviesByGenre = () => {
 
         {/* Load More Button */}
         {hasNextPage && !isPageLoading && movies.length > 0 && (
-          <motion.div 
+          <motion.div
             className="text-center mt-12"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -252,7 +255,7 @@ const MoviesByGenre = () => {
                 Load More Movies
                 <ChevronDown className="w-5 h-5 group-hover:animate-bounce" />
               </span>
-              
+
               {/* Button shine effect */}
               <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
             </motion.button>
@@ -261,7 +264,7 @@ const MoviesByGenre = () => {
 
         {/* Loading More Indicator */}
         {isPageLoading && (
-          <motion.div 
+          <motion.div
             className="flex justify-center items-center mt-8"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -276,7 +279,7 @@ const MoviesByGenre = () => {
 
         {/* End of Results */}
         {!hasNextPage && movies.length > 0 && (
-          <motion.div 
+          <motion.div
             className="text-center mt-12"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -296,7 +299,7 @@ const MoviesByGenre = () => {
 
         {/* Empty State */}
         {!isLoading && movies.length === 0 && (
-          <motion.div 
+          <motion.div
             className="text-center py-20"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -305,7 +308,7 @@ const MoviesByGenre = () => {
             <div className="text-6xl mb-6">🎭</div>
             <h2 className="text-2xl font-bold text-white mb-4">No Movies Found</h2>
             <p className="text-gray-400 max-w-md mx-auto">
-              We couldn't find any {genreName.toLowerCase()} movies at the moment. 
+              We couldn't find any {genreName.toLowerCase()} movies at the moment.
               Try exploring other genres or check back later!
             </p>
           </motion.div>

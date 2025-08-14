@@ -270,19 +270,30 @@ async def get_recommendations(request_body:RequestBody):
     if not keyword_ids:
         raise HTTPException(status_code=400, detail="No keywords found for the selected mood")
 
+    # Build the parameters for the TMDB API call
+    params = {
+        'api_key': TMDB_API_KEY,
+        'with_genres': filters.genre,
+        'certification_country': 'US',
+        'certification': filters.ageRating,
+        'with_original_language': filters.language,
+        'page': page,
+        # 'with_keywords': ','.join([str(kw) for kw in keyword_ids])
+    }
+
+    # Add dynamic date filtering based on movieAge
+    if filters.movieAge:
+        five_years_ago = datetime.now().replace(year=datetime.now().year - 5)
+        if filters.movieAge == 'new':
+            # Modern movies: released in the last 5 years
+            params['primary_release_date.gte'] = five_years_ago.strftime('%Y-%m-%d')
+        elif filters.movieAge == 'classic':
+            # Classic movies: released more than 5 years ago
+            params['primary_release_date.lte'] = five_years_ago.strftime('%Y-%m-%d')
+
     try:
         # Call TMDB API to discover movies with genre and keyword filters
-        response = requests.get(f"{TMDB_BASE_URL}/discover/movie", params={
-            'api_key': TMDB_API_KEY,
-            'with_genres': filters.genre,
-            'certification_country': 'US',
-            'certification': filters.ageRating,
-            'primary_release_date_gte': datetime.now().strftime('%Y-%m-%d') if filters.movieAge == 'new' else '2000-01-01',
-            'with_original_language':filters.language,
-            'page': page,  # Pagination: TMDB supports page-based results
-            # 'with_keywords': ','.join([str(kw) for kw in keyword_ids])  # Join the keyword IDs
-        })
-       
+        response = requests.get(f"{TMDB_BASE_URL}/discover/movie", params=params)
         response.raise_for_status()
     except requests.exceptions.RequestException:
         raise HTTPException(status_code=500, detail="Error fetching movies from TMDB")

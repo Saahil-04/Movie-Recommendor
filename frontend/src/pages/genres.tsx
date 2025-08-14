@@ -3,6 +3,7 @@ import { Card, CardContent } from "../components/ui/card"
 import { useNavigate } from 'react-router-dom';
 import { motion } from "framer-motion"
 import { Film, Sparkles } from "lucide-react";
+import { useScrollToTop } from '../hooks/useScrollToTop';
 
 type Genre = {
   id: number
@@ -52,6 +53,8 @@ export default function Genres() {
   const handleGenreClick = (genreId: number, genreName: string) => {
     navigate(`/genres/${genreId}`, { state: { genreName } })
   }
+
+  useScrollToTop()
 
   return (
     <div className="relative min-h-screen overflow-hidden">
