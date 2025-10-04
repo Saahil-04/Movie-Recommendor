@@ -54,8 +54,7 @@ const Recommendation = () => {
 
     try {
       const response = await axios.post(
-        // `${process.env.REACT_APP_API_URL}/recommendations/`,
-         `http://localhost:8000/recommendations/`,
+        `${process.env.REACT_APP_API_URL}/recommendations/`,
         { filters, page: 1, page_size: 20 }
       );
       console.log("This is the response: ",response.data)
@@ -75,8 +74,7 @@ const Recommendation = () => {
     try {
       const nextPage = currentPage + 1;
       const response = await axios.post(
-        // `${process.env.REACT_APP_API_URL}/recommendations/`,
-        `http://localhost:8000/recommendations/`,
+        `${process.env.REACT_APP_API_URL}/recommendations/`,
         {
           filters: currentFilters,
           page: nextPage,

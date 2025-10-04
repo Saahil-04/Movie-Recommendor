@@ -69,10 +69,9 @@ const MoviesByGenre = () => {
       else setIsPageLoading(true);
 
       const response = await axios.get(
-        // `${process.env.REACT_APP_API_URL}/api/movies/genre/${genreId}`,
-        // { params: { page } }
-        `http://localhost:8000/api/movies/genre/${genreId}`,
+        `${process.env.REACT_APP_API_URL}/api/movies/genre/${genreId}`,
         { params: { page } }
+       
       );
 
       const { movies: newMovies, hasNextPage: nextPage } = response.data;
