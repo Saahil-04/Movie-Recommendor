@@ -487,7 +487,7 @@ async def signup(user: UserCreate, db: Session = Depends(database.get_db)):
     db.refresh(db_user)
     
     logger.info(f"New user registered: {user.username}")
-    return User(username=db_user.username, email=db_user.email)
+    return db_user
 
 @app.post("/auth/token", response_model=Token)
 async def login_for_access_token(
@@ -516,7 +516,7 @@ async def login_for_access_token(
 @app.get("/users/me", response_model=User)
 async def read_users_me(current_user: database.User = Depends(get_current_user)):
     """Get current authenticated user"""
-    return User(username=current_user.username, email=current_user.email)
+    return current_user
 
 # ============= WISHLIST ENDPOINTS =============
 
