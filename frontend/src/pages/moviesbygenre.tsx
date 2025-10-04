@@ -69,11 +69,15 @@ const MoviesByGenre = () => {
       else setIsPageLoading(true);
 
       const response = await axios.get(
-        `${process.env.REACT_APP_API_URL}/api/movies/genre/${genreId}`,
+        // `${process.env.REACT_APP_API_URL}/api/movies/genre/${genreId}`,
+        // { params: { page } }
+        `http://localhost:8000/api/movies/genre/${genreId}`,
         { params: { page } }
       );
 
       const { movies: newMovies, hasNextPage: nextPage } = response.data;
+      console.log("Fetched movies:", newMovies);
+
 
       setMovies((prevMovies) => {
         const movieIds = new Set(prevMovies.map((movie) => movie.id));
@@ -207,7 +211,7 @@ const MoviesByGenre = () => {
                     title: movie.title,
                     poster_url: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
                     rating: movie.rating,
-                    genre: movie.genre || ["Unknown"],
+                    genre: movie.genre,
                     overview: movie.overview || "No description available.",
                     cast: movie.cast || ["Cast info unavailable"],
                   }}

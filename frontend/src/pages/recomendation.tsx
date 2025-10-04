@@ -54,9 +54,11 @@ const Recommendation = () => {
 
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/recommendations/`,
+        // `${process.env.REACT_APP_API_URL}/recommendations/`,
+         `http://localhost:8000/recommendations/`,
         { filters, page: 1, page_size: 20 }
       );
+      console.log("This is the response: ",response.data)
       setFilteredMovies(response.data.movies);
       setTotalPages(response.data.pagination.total_pages);
     } catch (error) {
@@ -73,7 +75,8 @@ const Recommendation = () => {
     try {
       const nextPage = currentPage + 1;
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/recommendations/`,
+        // `${process.env.REACT_APP_API_URL}/recommendations/`,
+        `http://localhost:8000/recommendations/`,
         {
           filters: currentFilters,
           page: nextPage,
@@ -82,6 +85,7 @@ const Recommendation = () => {
       );
 
       if (response.data.pagination.current_page === nextPage) {
+        
         setFilteredMovies((prev) => [...prev, ...response.data.movies]);
         setCurrentPage(nextPage);
       }

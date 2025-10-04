@@ -6,7 +6,6 @@ import {
 } from "../components/ui/hover-card";
 import { Link } from "react-router-dom";
 import { Star, Play, Info } from "lucide-react";
-import { useScrollToTop } from "../hooks/useScrollToTop";
 
 interface MovieCardProps {
   movie: {
@@ -21,8 +20,6 @@ interface MovieCardProps {
 }
 
 const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
-
-  useScrollToTop()
 
   return (
     <HoverCard openDelay={150} closeDelay={100}>

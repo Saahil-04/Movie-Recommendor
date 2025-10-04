@@ -3,13 +3,16 @@
 import { Link } from "react-router-dom"
 import { Button } from "../components/ui/button"
 import { cn } from "../libs/utils"
-import { Film } from "lucide-react"
+import { Film, LogIn, LogOut, User } from "lucide-react"
 import { useState, useEffect } from "react"
+import { useAuth } from "../AuthContext"
 
 export default function Navbar() {
   const [isVisible, setIsVisible] = useState(false)
   const [lastScrollY, setLastScrollY] = useState(0)
   const [isAtTop, setIsAtTop] = useState(true)
+
+  const { isAuthenticated, logout } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -53,22 +56,41 @@ export default function Navbar() {
             </span>
           </Link>
 
-          {/* Nav Button */}
-          <Button
-            asChild
-            variant="ghost"
-            className={cn(
-              "relative text-white hover:bg-gradient-to-r hover:from-purple-600/20 hover:to-pink-600/20",
-              "text-sm rounded-full px-6 py-2 font-medium transition-all duration-300",
-              "border border-white/20 hover:border-purple-400/50 hover:shadow-lg hover:shadow-purple-500/25",
-              "backdrop-blur-sm hover:scale-105"
+          {/* Auth and Nav Buttons */}
+          <div className="flex items-center gap-4">
+            <Button
+              asChild
+              variant="ghost"
+              className={cn(
+                "relative text-white hover:bg-gradient-to-r hover:from-purple-600/20 hover:to-pink-600/20",
+                "text-sm rounded-full px-6 py-2 font-medium transition-all duration-300",
+                "border border-white/20 hover:border-purple-400/50 hover:shadow-lg hover:shadow-purple-500/25",
+                "backdrop-blur-sm hover:scale-105"
+              )}
+            >
+              <Link to="/recommendation" className="relative z-10">
+                Recommend Me!
+              </Link>
+            </Button>
+            {isAuthenticated ? (
+              <>
+                <Button asChild variant="ghost" className="p-2 rounded-full hover:bg-white/10">
+                  <Link to="/profile" title="Profile">
+                    <User className="w-5 h-5 text-white" />
+                  </Link>
+                </Button>
+                <Button variant="ghost" onClick={logout} className="p-2 rounded-full hover:bg-white/10" title="Logout">
+                  <LogOut className="w-5 h-5 text-white" />
+                </Button>
+              </>
+            ) : (
+              <Button asChild variant="ghost" className="p-2 rounded-full hover:bg-white/10">
+                <Link to="/login" title="Login">
+                  <LogIn className="w-5 h-5 text-white" />
+                </Link>
+              </Button>
             )}
-          >
-            <Link to="/recommendation" className="relative z-10">
-              Recommend Me!
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-600/10 to-pink-600/10 rounded-full opacity-0 hover:opacity-100 transition-opacity duration-300 -z-10"></div>
-            </Link>
-          </Button>
+          </div>
         </div>
       </header>
 
