@@ -469,52 +469,38 @@ async def get_recommendations(request_body: RequestBody):
 @app.post("/auth/signup", response_model=User, status_code=status.HTTP_201_CREATED)
 async def signup(user: UserCreate, db: Session = Depends(database.get_db)):
     """Register a new user"""
-    try:
-        logger.info(f"Signup attempt for username: {user.username}, email: {user.email}")
-        
-        # Check existing email
-        existing_email = database.get_user_by_email(db, email=user.email)
-        if existing_email:
-            logger.warning(f"Email already registered: {user.email}")
-            raise HTTPException(status_code=400, detail="Email already registered")
-        
-        # Check existing username
-        existing_username = database.get_user_by_username(db, username=user.username)
-        if existing_username:
-            logger.warning(f"Username already taken: {user.username}")
-            raise HTTPException(status_code=400, detail="Username already taken")
-
-        # Hash password
-        logger.info("Hashing password...")
-        hashed_password = security.get_password_hash(user.password)
-        
-        # Create user
-        logger.info("Creating user object...")
-        db_user = database.User(
-            username=user.username,
-            email=user.email,
-            hashed_password=hashed_password
+    # Validate password length for bcrypt
+    if len(user.password.encode('utf-8')) > 72:
+        raise HTTPException(
+            status_code=400, 
+            detail="Password is too long. Maximum length is 72 characters."
         )
-        
-        # Save to database
-        logger.info("Adding user to database...")
-        db.add(db_user)
-        
-        logger.info("Committing transaction...")
-        db.commit()
-        
-        logger.info("Refreshing user object...")
-        db.refresh(db_user)
-        
-        logger.info(f"New user registered successfully: {user.username}")
-        return db_user
-        
-    except HTTPException:
-        raise
+    
+    if database.get_user_by_email(db, email=user.email):
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    if database.get_user_by_username(db, username=user.username):
+        raise HTTPException(status_code=400, detail="Username already taken")
+
+    try:
+        hashed_password = security.get_password_hash(user.password)
     except Exception as e:
-        logger.error(f"Signup error: {str(e)}", exc_info=True)
-        db.rollback()
-        raise HTTPException(status_code=500, detail=f"Registration failed: {str(e)}")
+        logger.error(f"Password hashing failed: {e}")
+        raise HTTPException(status_code=400, detail="Invalid password format")
+    
+    db_user = database.User(
+        username=user.username,
+        email=user.email,
+        hashed_password=hashed_password
+    )
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    
+    logger.info(f"New user registered: {user.username}")
+    return db_user
+        
+ 
 
 @app.post("/auth/token", response_model=Token)
 async def login_for_access_token(
