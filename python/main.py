@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
@@ -66,7 +66,14 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 class UserCreate(BaseModel):
     username: str = Field(..., min_length=3, max_length=50)
     email: str = Field(..., regex=r'^[\w\.-]+@[\w\.-]+\.\w+$')
-    password: str = Field(..., min_length=6)
+    password: str = Field(..., min_length=6, max_length=72)
+    
+    @validator('password')
+    def validate_password_bytes(cls, v):
+        """Ensure password doesn't exceed bcrypt's 72 byte limit"""
+        if len(v.encode('utf-8')) > 72:
+            raise ValueError('Password cannot exceed 72 bytes when encoded')
+        return v
 
 class User(BaseModel):
     username: str
@@ -469,36 +476,44 @@ async def get_recommendations(request_body: RequestBody):
 @app.post("/auth/signup", response_model=User, status_code=status.HTTP_201_CREATED)
 async def signup(user: UserCreate, db: Session = Depends(database.get_db)):
     """Register a new user"""
-    # Validate password length for bcrypt
-    if len(user.password.encode('utf-8')) > 72:
-        raise HTTPException(
-            status_code=400, 
-            detail="Password is too long. Maximum length is 72 characters."
-        )
-    
-    if database.get_user_by_email(db, email=user.email):
-        raise HTTPException(status_code=400, detail="Email already registered")
-    
-    if database.get_user_by_username(db, username=user.username):
-        raise HTTPException(status_code=400, detail="Username already taken")
-
     try:
+        # Check for existing users
+        if database.get_user_by_email(db, email=user.email):
+            raise HTTPException(status_code=400, detail="Email already registered")
+        
+        if database.get_user_by_username(db, username=user.username):
+            raise HTTPException(status_code=400, detail="Username already taken")
+
+        # Hash password
         hashed_password = security.get_password_hash(user.password)
+        
+        # Create user
+        db_user = database.User(
+            username=user.username,
+            email=user.email,
+            hashed_password=hashed_password
+        )
+        db.add(db_user)
+        db.commit()
+        db.refresh(db_user)
+        
+        logger.info(f"New user registered: {user.username}")
+        return db_user
+        
+    except HTTPException:
+        # Re-raise HTTP exceptions (like duplicate email/username)
+        raise
+    except ValueError as e:
+        # Handle validation errors (like password too long)
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        logger.error(f"Password hashing failed: {e}")
-        raise HTTPException(status_code=400, detail="Invalid password format")
-    
-    db_user = database.User(
-        username=user.username,
-        email=user.email,
-        hashed_password=hashed_password
-    )
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    
-    logger.info(f"New user registered: {user.username}")
-    return db_user
+        # Handle any other errors
+        logger.error(f"Signup error: {str(e)}", exc_info=True)
+        db.rollback()
+        raise HTTPException(
+            status_code=500, 
+            detail="Registration failed. Please try again."
+        )
         
  
 
