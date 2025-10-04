@@ -516,6 +516,7 @@ async def login_for_access_token(
 @app.get("/users/me", response_model=User)
 async def read_users_me(current_user: database.User = Depends(get_current_user)):
     """Get current authenticated user"""
+
     return current_user
 
 # ============= WISHLIST ENDPOINTS =============

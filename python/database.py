@@ -2,6 +2,9 @@ from sqlalchemy import create_engine, Column, Integer, String, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session, relationship
 from typing import Generator, Optional
+import logging
+
+logger = logging.getLogger(__name__)
 
 # --- Database Configuration ---
 # For production, you would typically use PostgreSQL or MySQL.
@@ -49,6 +52,18 @@ class WishlistMovie(Base):
 
 # --- Database Utility Functions ---
 
+def create_db_tables():
+    """
+    Creates all database tables defined in the models.
+    This should be called on application startup.
+    """
+    try:
+        Base.metadata.create_all(bind=engine)
+        logger.info("Database tables created successfully")
+    except Exception as e:
+        logger.error(f"Failed to create database tables: {e}")
+        raise
+
 def get_db() -> Generator[Session, None, None]:
     """
     Dependency that provides a database session.
@@ -77,7 +92,10 @@ def get_wishlist_for_user(db: Session, user_id: int) -> list[WishlistMovie]:
 
 def get_wishlist_item(db: Session, user_id: int, movie_id: int) -> Optional[WishlistMovie]:
     """Retrieves a specific wishlist item for a user and movie."""
-    return db.query(WishlistMovie).filter(WishlistMovie.user_id == user_id, WishlistMovie.movie_id == movie_id).first()
+    return db.query(WishlistMovie).filter(
+        WishlistMovie.user_id == user_id, 
+        WishlistMovie.movie_id == movie_id
+    ).first()
 
 def add_movie_to_wishlist(db: Session, user_id: int, movie_id: int) -> WishlistMovie:
     """Adds a movie to a user's wishlist."""
@@ -91,6 +109,3 @@ def remove_movie_from_wishlist(db: Session, db_wishlist_item: WishlistMovie):
     """Removes a movie from a user's wishlist."""
     db.delete(db_wishlist_item)
     db.commit()
-
-def create_db_tables():
-    Base.metadata.create_all(bind=engine)
