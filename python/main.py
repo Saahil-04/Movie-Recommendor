@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
@@ -65,15 +65,17 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
 class UserCreate(BaseModel):
     username: str = Field(..., min_length=3, max_length=50)
-    email: str = Field(..., regex=r'^[\w\.-]+@[\w\.-]+\.\w+$')
+    email: str = Field(..., pattern=r'^[\w\.-]+@[\w\.-]+\.\w+$')
     password: str = Field(..., min_length=6, max_length=72)
     
-    @validator('password')
+    @field_validator('password')
+    @classmethod
     def validate_password_bytes(cls, v):
         """Ensure password doesn't exceed bcrypt's 72 byte limit"""
         if len(v.encode('utf-8')) > 72:
             raise ValueError('Password cannot exceed 72 bytes when encoded')
         return v
+
 
 class User(BaseModel):
     username: str
@@ -100,9 +102,9 @@ class WishlistMovie(WishlistMovieBase):
         orm_mode = True
 
 class Filters(BaseModel):
-    mood: Optional[str] = Field(None, regex='^(happy|neutral|sad)$')
+    mood: Optional[str] = Field(None, pattern='^(happy|neutral|sad)$')  # Changed regex to pattern
     genre: int = Field(..., gt=0)
-    movieAge: Optional[str] = Field(None, regex='^(new|classic|all)$')
+    movieAge: Optional[str] = Field(None, pattern='^(new|classic|all)$')  # Changed regex to pattern
     ageRating: Optional[str] = None
     language: Optional[str] = None
 
