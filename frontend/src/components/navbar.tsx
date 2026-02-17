@@ -10,16 +10,12 @@ import { useAuth } from "../AuthContext"
 export default function Navbar() {
   const [isVisible, setIsVisible] = useState(false)
   const [lastScrollY, setLastScrollY] = useState(0)
-  const [isAtTop, setIsAtTop] = useState(true)
 
   const { isAuthenticated, logout } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY
-      
-      // Check if we're at the top of the page
-      setIsAtTop(currentScrollY < 10)
       
       // Show floating navbar only when scrolling up and not at top
       if (currentScrollY < lastScrollY && currentScrollY > 100) {

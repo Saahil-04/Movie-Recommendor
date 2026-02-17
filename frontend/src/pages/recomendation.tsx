@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import axios from "axios";
 import { motion, Variants } from "framer-motion";
 import MovieFilters from "../components/moviefilters";
@@ -67,7 +67,7 @@ const Recommendation = () => {
     }
   };
 
-  const fetchMoreMovies = async () => {
+  const fetchMoreMovies = useCallback(async () => {
     if (loadingMore || currentPage >= totalPages) return;
     setLoadingMore(true);
 
@@ -92,7 +92,7 @@ const Recommendation = () => {
     } finally {
       setLoadingMore(false);
     }
-  };
+  }, [loadingMore, currentPage, totalPages, currentFilters]);
 
   useEffect(() => {
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
@@ -110,13 +110,14 @@ const Recommendation = () => {
       { threshold: 1.0 }
     );
 
-    if (observerRef.current) observer.observe(observerRef.current);
+    const currentObserver = observerRef.current;
+    if (currentObserver) observer.observe(currentObserver);
 
     return () => {
-      if (observerRef.current) observer.unobserve(observerRef.current);
+      if (currentObserver) observer.unobserve(currentObserver);
       if (timeoutId) clearTimeout(timeoutId);
     };
-  }, [loadingMore, currentPage, totalPages, currentFilters]);
+  }, [loadingMore, currentPage, totalPages, currentFilters, fetchMoreMovies]);
 
 
 

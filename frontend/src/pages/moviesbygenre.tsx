@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useLocation } from "react-router-dom";
 import axios from "axios";
 import { motion, Variants } from "framer-motion";
@@ -63,7 +63,7 @@ const MoviesByGenre = () => {
   const [hasNextPage, setHasNextPage] = useState(true);
   const genreName = state?.genreName || "Movies";
 
-  const fetchMovies = async (page: number, isInitialLoad = false) => {
+  const fetchMovies = useCallback(async (page: number, isInitialLoad = false) => {
     try {
       if (isInitialLoad) setIsLoading(true);
       else setIsPageLoading(true);
@@ -94,14 +94,14 @@ const MoviesByGenre = () => {
       if (isInitialLoad) setIsLoading(false);
       else setIsPageLoading(false);
     }
-  };
+  }, [genreId]);
 
   useEffect(() => {
     setMovies([]);
     setCurrentPage(1);
     setHasNextPage(true);
     fetchMovies(1, true);
-  }, [genreId]);
+  }, [genreId, fetchMovies]);
 
   useScrollToTop()
 
