@@ -1,7 +1,9 @@
 from fastapi import FastAPI, HTTPException, Depends, status
+from contextlib import asynccontextmanager
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi import Query
 from pydantic import BaseModel, Field, field_validator
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
@@ -23,19 +25,21 @@ logger = logging.getLogger(__name__)
 
 load_dotenv()
 
-app = FastAPI(
-    title="Movie Recommendation API",
-    description="API for movie recommendations with user authentication",
-    version="1.0.0"
-)
 
 # Database initialization
-@app.on_event("startup")
-async def on_startup():
-    """Initialize database tables and genre mapping on startup"""
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     database.create_db_tables()
     await initialize_genre_mapping()
     logger.info("Application startup complete")
+    yield
+
+app = FastAPI(
+    title="Movie Recommendation API",
+    description="API for movie recommendations with user authentication",
+    version="1.0.0",
+    lifespan=lifespan
+)
 
 # CORS Configuration
 app.add_middleware(
@@ -59,7 +63,7 @@ if not TMDB_API_KEY:
 GENRE_MAPPING: Dict[int, str] = {}
 
 # Auth Setup
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 # ============= PYDANTIC MODELS =============
 
@@ -81,8 +85,9 @@ class User(BaseModel):
     username: str
     email: str
 
-    class Config:
-        orm_mode = True
+    model_config = {
+    "from_attributes": True
+    }
 
 class Token(BaseModel):
     access_token: str
@@ -98,8 +103,9 @@ class WishlistMovie(WishlistMovieBase):
     id: int
     user_id: int
 
-    class Config:
-        orm_mode = True
+    model_config = {
+    "from_attributes": True
+    }
 
 class Filters(BaseModel):
     mood: Optional[str] = Field(None, pattern='^(happy|neutral|sad)$')  # Changed regex to pattern
@@ -471,6 +477,90 @@ async def get_recommendations(request_body: RequestBody):
                 total_results=data.get('total_results', 0)
             )
         )
+        
+# Add this to your existing main.py file
+
+@app.get("/api/movies/search")
+async def search_movies(
+    query: str = Query(..., min_length=1, description="Search query for movies"),
+    page: int = Query(1, ge=1, description="Page number"),
+    include_adult: bool = Query(False, description="Include adult content")
+):
+    """Search for movies by title, keyword, or description"""
+    if not query or not query.strip():
+        raise HTTPException(status_code=400, detail="Search query cannot be empty")
+    
+    try:
+        async with httpx.AsyncClient(timeout=15.0) as client:
+            response = await client.get(
+                f"{TMDB_BASE_URL}/search/movie",
+                params={
+                    "api_key": TMDB_API_KEY,
+                    "query": query.strip(),
+                    "page": page,
+                    "include_adult": include_adult,
+                    "language": "en-US"
+                }
+            )
+            response.raise_for_status()
+            data = response.json()
+            
+            movies = data.get('results', [])
+            
+            if not movies:
+                return JSONResponse(content={
+                    "movies": [],
+                    "pagination": {
+                        "current_page": page,
+                        "total_pages": 0,
+                        "total_results": 0,
+                        "has_next_page": False
+                    },
+                    "message": "No movies found matching your search"
+                })
+            
+            # Fetch cast for each movie concurrently
+            cast_tasks = [get_movie_cast(client, movie['id']) for movie in movies]
+            casts = await asyncio.gather(*cast_tasks)
+            
+            movie_details = [
+                {
+                    "id": movie['id'],
+                    "title": movie['title'],
+                    "overview": movie.get('overview', ''),
+                    "poster_url": f"https://image.tmdb.org/t/p/w500{movie['poster_path']}"
+                    if movie.get('poster_path') else None,
+                    "backdrop_url": f"https://image.tmdb.org/t/p/w1280{movie['backdrop_path']}"
+                    if movie.get('backdrop_path') else None,
+                    "rating": movie.get('vote_average', 0.0),
+                    "release_date": movie.get('release_date'),
+                    "genre": replace_genre_ids_with_names(movie.get('genre_ids', [])),
+                    "cast": cast,
+                    "popularity": movie.get('popularity', 0)
+                }
+                for movie, cast in zip(movies, casts)
+            ]
+            
+            return JSONResponse(content={
+                "movies": movie_details,
+                "pagination": {
+                    "current_page": page,
+                    "total_pages": data.get('total_pages', 1),
+                    "total_results": data.get('total_results', 0),
+                    "has_next_page": page < data.get('total_pages', 1)
+                }
+            })
+            
+    except httpx.HTTPStatusError as e:
+        logger.error(f"TMDB API error during search: {e}")
+        raise HTTPException(
+            status_code=e.response.status_code,
+            detail="Failed to search movies from TMDB"
+        )
+    except Exception as e:
+        logger.error(f"Error searching movies: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error during search")        
+        
 
 
 # ============= AUTHENTICATION ENDPOINTS =============
