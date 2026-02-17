@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Play, Star, Clock, Calendar, Users, Film, Bookmark, BookMarked } from 'lucide-react';
@@ -27,7 +27,6 @@ const MovieDetails = () => {
   const { id } = useParams();
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState<'trailer' | 'movie' | null>(null);
   const { isAuthenticated, wishlist, addToWishlist, removeFromWishlist } = useAuth();
 
   const isInWishlist = movie ? wishlist.some(item => item.movie_id === movie.id) : false;
@@ -38,12 +37,6 @@ const MovieDetails = () => {
         const response = await api.get(`/movies/${id}`);
         const movieData = response.data;
         setMovie(movieData);
-        // Set initial view state based on available data
-        if (movieData.trailerUrl) {
-          setView('trailer');
-        } else {
-          setView('movie');
-        }
       } catch (error) {
         console.error('Error fetching movie details:', error);
       } finally {
@@ -252,52 +245,42 @@ const MovieDetails = () => {
           </div>
         </motion.div>
 
-        {/* Watch Section (Trailer/Movie) */}
-        {view && (movie.trailerUrl || movie.id) && (
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.7 }}
-            className="mb-16"
-          >
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-              <div className="flex items-center gap-3">
-                <Play className="w-6 h-6 text-purple-400" />
-                <h2 className="text-3xl font-bold text-white">Watch</h2>
-              </div>
-              {/* Only show the switch if both options are available */}
-              {movie.trailerUrl && (
-                <div className="flex items-center gap-2 bg-black/20 backdrop-blur-md p-1 rounded-xl border border-white/10">
-                  <button
-                    onClick={() => setView('trailer')}
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${view === 'trailer' ? 'bg-purple-600 text-white' : 'text-gray-300 hover:bg-white/10'}`}
-                  >
-                    Trailer
-                  </button>
-                  <button
-                    onClick={() => setView('movie')}
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${view === 'movie' ? 'bg-purple-600 text-white' : 'text-gray-300 hover:bg-white/10'}`}
-                  >
-                    Movie
-                  </button>
-                </div>
-              )}
-            </div>
+
+        {/* Watch Section (Trailer Only) */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.7 }}
+          className="mb-16"
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <Play className="w-6 h-6 text-purple-400" />
+            <h2 className="text-3xl font-bold text-white">Trailer</h2>
+          </div>
+
+          {movie.trailerUrl ? (
             <div className="relative aspect-video rounded-2xl overflow-hidden border border-white/10 shadow-2xl group">
               <iframe
-                key={view} // Add key to force re-render on src change
-                src={view === 'trailer'
-                  ? movie.trailerUrl!
-                  : `https://vidsrc.cc/v2/embed/movie/${movie.id}`}
-                title={view === 'trailer' ? 'Movie Trailer' : 'Movie'}
+                src={movie.trailerUrl}
+                title="Movie Trailer"
                 allowFullScreen
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 className="w-full h-full"
               />
               <div className="absolute inset-0 bg-gradient-to-br from-purple-600/10 to-blue-600/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
             </div>
-          </motion.div>
-        )}
+          ) : (
+            <div className="bg-black/20 backdrop-blur-xl border border-white/10 rounded-2xl p-12 text-center">
+              <Play className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-300 mb-2">
+                Trailer Not Available
+              </h3>
+              <p className="text-gray-500">
+                The trailer for this movie has not been added yet.
+              </p>
+            </div>
+          )}
+        </motion.div>
 
         {/* Cast Section */}
         <motion.div

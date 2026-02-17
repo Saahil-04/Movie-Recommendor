@@ -1,11 +1,23 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { motion } from "framer-motion";
 import { useScrollToTop } from "../hooks/useScrollToTop";
+import React, { useState } from "react";
+import { Search } from "lucide-react";
 
 export default function Home() {
 
+  const [searchQuery, setSearchQuery] = useState('')
+  const navigate = useNavigate()
+
   useScrollToTop()
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      navigate(`/search?query=${encodeURIComponent(searchQuery)}`)
+    }
+  }
 
   return (
     <div className="relative min-h-screen overflow-hidden">
@@ -67,6 +79,31 @@ export default function Home() {
             Your cinematic journey begins here. Discover films that resonate with your soul,
             curated by intelligent algorithms and passionate movie lovers.
           </motion.p>
+
+          <motion.form
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.45 }}
+            onSubmit={handleSearch}
+            className="max-w-2xl mx-auto mb-12 relative z-20"
+          >
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-300" />
+              <div className="relative flex items-center bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-2 transition-colors group-hover:bg-white/15 group-hover:border-white/30">
+                <Search className="w-6 h-6 text-gray-400 ml-3" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search for movies..."
+                  className="w-full bg-transparent border-none text-white placeholder-gray-400 focus:ring-0 focus:outline-none px-4 py-2 text-lg"
+                />
+                <Button type="submit" className="rounded-xl bg-purple-600 hover:bg-purple-700 text-white px-6">
+                  Search
+                </Button>
+              </div>
+            </div>
+          </motion.form>
 
           <motion.div
             initial={{ opacity: 0, y: 30 }}

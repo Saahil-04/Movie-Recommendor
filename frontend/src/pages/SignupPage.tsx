@@ -13,20 +13,32 @@ const SignupPage = () => {
   const [success, setSuccess] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    setSuccess('');
-    try {
-      await signup({ username, email, password });
-      setSuccess('Signup successful! Redirecting to login...');
-      setTimeout(() => {
-        navigate('/login');
-      }, 2000);
-    } catch (err: any) {
-      setError(err.response?.data?.detail || 'Failed to sign up. Please try again.');
-      console.error(err);
+  e.preventDefault();
+  setError('');
+  setSuccess('');
+  try {
+    await signup({ username, email, password });
+    setSuccess('Signup successful! Redirecting to login...');
+    setTimeout(() => {
+      navigate('/login');
+    }, 2000);
+  } catch (err: any) {
+    // Handle validation errors from FastAPI/Pydantic
+    if (err.response?.data?.detail && Array.isArray(err.response.data.detail)) {
+      // Extract all error messages and join them
+      const errorMessages = err.response.data.detail
+        .map((error: any) => error.msg)
+        .join(', ');
+      setError(errorMessages);
+    } else if (typeof err.response?.data?.detail === 'string') {
+      // Handle string error messages
+      setError(err.response.data.detail);
+    } else {
+      setError('Failed to sign up. Please try again.');
     }
-  };
+    console.error(err);
+  }
+};
 
   return (
     <Container maxWidth="xs">
