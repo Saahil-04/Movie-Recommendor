@@ -677,7 +677,7 @@ async def remove_from_wishlist(
 
 # ============= ROOT ENDPOINT =============
 
-@app.get("/")
+@app.api_route("/",methods=["GET","HEAD"])
 async def root():
     return {"message": "API running"}
 
