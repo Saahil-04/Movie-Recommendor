@@ -679,8 +679,7 @@ async def remove_from_wishlist(
 
 @app.get("/")
 async def root():
-    """Redirect to API documentation"""
-    return RedirectResponse(url="/docs")
+    return {"message": "API running"}
 
 @app.get("/health")
 async def health_check():
