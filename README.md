@@ -1,97 +1,89 @@
-# 🎮 Movie Recommender
+# FlicPick – AI-Powered Movie Recommendation Platform
 
-**Movie Recommender** is a personalized film discovery platform that recommends movies based on your mood and genre preferences. Powered by machine learning and integrated with The Movie Database (TMDB), it helps users discover hidden gems and trending favorites through a modern, responsive interface.
-
----
-
-## 🌟 Features
-
-* 🎭 **Mood-Based Recommendations** – Happy, Sad, Neutral? Get tailored suggestions.
-* 🎮 **Genre Filtering** – Explore trending movies by genre.
-* 🔍 **Smart Search** – Search and find movies with detailed info.
-* 🧠 **Machine Learning Backend** – Makes intelligent, context-aware recommendations.
-* 📈 **Trending & Top Picks** – Stay updated with what’s hot.
-* 🌙 **Modern Dark UI** – Responsive design built with MUI and React.
+Live Demo: https://flicpick.vercel.app  
+Portfolio: https://saahil-portfolio.vercel.app  
 
 ---
 
-## 🧱 Tech Stack
+## Overview
 
-| Frontend           | Backend          | Machine Learning     | Data/API Source |
-| ------------------ | ---------------- | -------------------- | --------------- |
-| React + TypeScript | Python + FastAPI | Scikit-learn, Pandas | TMDB API        |
+FlicPick is a full-stack movie recommendation platform that suggests movies based on user mood and genre preferences using machine learning and external API integration.
 
-Other Tools:
+The system combines a modern React frontend with a FastAPI backend and a machine learning recommendation engine to provide personalized movie suggestions.
 
-* MUI (Material-UI)
-* Axios
-* React Router
-* JWT (for future authentication)
+This project demonstrates full-stack development, ML integration, REST API design, and scalable frontend-backend architecture.
 
 ---
 
-## 📦 Installation Guide
+## Key Features
 
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/your-username/movie-recommender.git
-cd movie-recommender
-```
-
-### 2. Backend Setup (FastAPI + ML)
-
-```bash
-cd backend
-python -m venv env
-source env/bin/activate  # Use ./env/Scripts/activate on Windows
-pip install -r requirements.txt
-uvicorn main:app --reload
-```
-
-> ⚠️ Make sure to add your TMDB API Key in your `.env` or config.
-
-### 3. Frontend Setup (React + MUI)
-
-```bash
-cd frontend
-npm install
-npm run dev
-```
-
-The frontend should now be running at: `http://localhost:3000`
+- Mood-based movie recommendations using ML model
+- Genre-based movie discovery
+- Real-time movie search with detailed information
+- Integration with TMDB API for live movie data
+- REST API backend built with FastAPI
+- Responsive frontend built with React and TypeScript
+- Modern UI built with Material UI
 
 ---
 
-## 🧪 API Endpoints
+## Tech Stack
 
-| Method | Endpoint           | Description                              |
-| ------ | ------------------ | ---------------------------------------- |
-| POST   | `/recommend/mood`  | Recommend movies based on mood           |
-| POST   | `/recommend/genre` | Recommend movies based on selected genre |
-| GET    | `/movies/trending` | Fetch trending movies from TMDB          |
-| GET    | `/movies/:id`      | Get detailed info for a specific movie   |
+Frontend:
+- React
+- TypeScript
+- Material UI
+- Axios
+
+Backend:
+- FastAPI
+- Python
+
+Machine Learning:
+- Scikit-learn
+- Pandas
+
+External API:
+- TMDB API
+
+Deployment:
+- Vercel (Frontend)
+- Backend deployed via Render
 
 ---
 
-## 📸 Screenshots
+## System Architecture
 
-> *(Insert screenshots or GIF previews)*
+The application follows a full-stack client-server architecture:
+
+1. User interacts with React frontend
+2. Frontend sends requests to FastAPI backend via REST APIs
+3. Backend processes recommendation logic using ML model
+4. Backend fetches additional movie data from TMDB API
+5. Backend returns structured recommendation data
+6. Frontend displays personalized movie recommendations
+
+This architecture demonstrates API design, ML integration, and scalable backend structure.
 
 ---
 
-## ✨ Example
+## API Endpoints
 
-**Request:**
+POST /recommendations  
+Returns movie recommendations based on mood
 
-```json
-POST /recommend/mood
-{
-  "mood": "happy"
-}
-```
+POST /recommend/genre  
+Returns movie recommendations based on selected genre
 
-**Response:**
+GET /movies/search?query  
+Fetches desired movies from TMDB API
+
+GET /movies/{id}  
+Returns detailed movie information
+
+---
+
+## Example API Response
 
 ```json
 [
@@ -99,35 +91,56 @@ POST /recommend/mood
     "title": "The Pursuit of Happyness",
     "overview": "...",
     "poster": "https://image.tmdb.org/..."
-  },
-  ...
+  }
 ]
 ```
 
 ---
 
-## 🚀 Upcoming Features
+## What This Project Demonstrates
 
-* 🢑 User accounts and favorite tracking
-* 🧠 Deep learning-based recommendation engine
-* 📱 PWA support for mobile experience
-* 💬 Chatbot-style assistant
+This project demonstrates my ability to:
 
----
-
-## 🛡 License
-
-MIT License. See the [LICENSE](LICENSE) file for full details.
+- Build full-stack applications using React and FastAPI
+- Design and implement REST APIs
+- Integrate machine learning models into web applications
+- Integrate external APIs into backend systems
+- Design scalable frontend-backend architecture
+- Deploy production-ready applications
 
 ---
 
-## 🙋‍♂️ Contributing
+## Challenges Solved
 
-Contributions are welcome! Please open an issue or a pull request if you'd like to collaborate.
+- Integrating ML recommendation logic into web backend
+- Managing frontend-backend communication
+- Handling external API integration efficiently
+- Designing scalable backend architecture
+- Deploying full-stack applications
 
 ---
 
-## 🔗 Contact
+## Repository Structure
 
-Made with ❤️ by [Your Name](https://github.com/your-username)
-Have questions or suggestions? Reach out via GitHub or email.
+```
+Movie-Recommendor/
+│
+├── frontend/      # React frontend
+├── python/        # ML recommendation engine
+└── backend/       # FastAPI backend
+```
+
+---
+
+## Live Demo
+
+https://flicpick.vercel.app
+
+---
+
+## Author
+
+Saahil Vishwakarma  
+Portfolio: https://saahil-portfolio.vercel.app  
+GitHub: https://github.com/Saahil-04  
+LinkedIn: https://www.linkedin.com/in/saahil-vishwakarma-7a5943288/
