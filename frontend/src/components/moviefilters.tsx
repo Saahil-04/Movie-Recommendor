@@ -281,10 +281,17 @@ const MovieFilters: React.FC<FilterProps> = ({ onFilter }) => {
               placeholder="Select language"
               fieldKey="language"
               icon={Globe}
-              options={languages.map((lang) => ({
-                value: lang.english_name,
-                label: lang.english_name,
-              }))}
+              options={languages
+                .reduce((unique, lang) => {
+                  if (!unique.some(item => item.english_name === lang.english_name)) {
+                    unique.push(lang);
+                  }
+                  return unique;
+                }, [] as Language[])
+                .map((lang) => ({
+                  value: lang.iso_639_1,
+                  label: lang.english_name,
+                }))}
             />
           </div>
         </div>

@@ -28,6 +28,7 @@ const fadeInVariants: Variants = {
 
 const Recommendation = () => {
   const [filteredMovies, setFilteredMovies] = useState<Movie[]>([]);
+  const [currentMood, setCurrentMood] = useState<string>("")
   const [isLoading, setIsLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -38,6 +39,7 @@ const Recommendation = () => {
   const observerRef = useRef<HTMLDivElement | null>(null);
 
   const handleFilter = async (filters: any) => {
+    setCurrentMood(filters.mood || "")
     setIsLoading(true);
     setCurrentPage(1);
     setCurrentFilters(filters);
@@ -57,7 +59,7 @@ const Recommendation = () => {
         `${process.env.REACT_APP_API_URL}/recommendations/`,
         { filters, page: 1, page_size: 20 }
       );
-      console.log("This is the response: ",response.data)
+      console.log("This is the response: ", response.data)
       setFilteredMovies(response.data.movies);
       setTotalPages(response.data.pagination.total_pages);
     } catch (error) {
@@ -83,7 +85,7 @@ const Recommendation = () => {
       );
 
       if (response.data.pagination.current_page === nextPage) {
-        
+
         setFilteredMovies((prev) => [...prev, ...response.data.movies]);
         setCurrentPage(nextPage);
       }
@@ -230,7 +232,7 @@ const Recommendation = () => {
                   viewport={{ once: true, margin: "-50px" }}
                   custom={i}
                 >
-                  <MovieCard movie={movie} />
+                  <MovieCard key = {movie.id} movie={movie} mood = {currentMood} />
                 </motion.div>
               ))}
             </motion.div>

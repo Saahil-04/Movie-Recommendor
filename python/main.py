@@ -15,9 +15,9 @@ import os
 from dotenv import load_dotenv
 import asyncio
 import logging
-
 import security
 import database
+from ai_service import get_movie_explanation
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -62,10 +62,14 @@ if not TMDB_API_KEY:
 # Global Cache
 GENRE_MAPPING: Dict[int, str] = {}
 
+    
+
+
+
 # Auth Setup
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
-# ============= PYDANTIC MODELS =============
+# PYDANTIC MODELS 
 
 class UserCreate(BaseModel):
     username: str = Field(..., min_length=3, max_length=50)
@@ -137,6 +141,13 @@ class PaginationInfo(BaseModel):
 class MoviesResponse(BaseModel):
     movies: List[MovieDetail]
     pagination: PaginationInfo
+    
+class ExplanationRequest(BaseModel):
+    mood: str
+    movie_id: int
+    movie_title: str
+    movie_overview: str
+    genres: list[str]    
 
 # ============= CONSTANTS =============
 
@@ -355,6 +366,24 @@ async def get_languages():
     except Exception as e:
         logger.error(f"Error fetching languages: {e}")
         raise HTTPException(status_code=500, detail="Failed to fetch languages")
+    
+@app.post("/movies/explain")
+async def explain_movie(request: ExplanationRequest):
+    
+    explanation = await get_movie_explanation(
+        mood=request.mood,
+        movie_title=request.movie_title,
+        movie_overview=request.movie_overview,
+        genres=request.genres
+    )
+    
+    if not explanation:
+        raise HTTPException(
+            status_code=503,
+            detail="AI explanation unavailable right now"
+        )
+    
+    return {"explanation": explanation}    
 
 @app.post("/recommendations", response_model=MoviesResponse)
 async def get_recommendations(request_body: RequestBody):
@@ -476,8 +505,7 @@ async def get_recommendations(request_body: RequestBody):
                 total_pages=data.get('total_pages', 1),
                 total_results=data.get('total_results', 0)
             )
-        )
-        
+        )         
 # Add this to your existing main.py file
 
 @app.get("/api/movies/search")
